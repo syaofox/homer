@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>配置管理</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .edit-form input, .edit-form select, .edit-form button {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -39,16 +51,49 @@
                 {% for item in category.nav_items %}
                     <li>
                         {{ item.title }} - {{ item.url }}
+                        <button onclick="toggleEditForm('{{ category.name }}-{{ loop.index }}')">编辑</button>
                         <form action="{{ url_for('config') }}" method="post" style="display: inline;">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="category" value="{{ category.name }}">
                             <input type="hidden" name="title" value="{{ item.title }}">
                             <button type="submit" onclick="return confirm('确定要删除这个项目吗？');">删除</button>
                         </form>
+                        <div id="editForm-{{ category.name }}-{{ loop.index }}" class="edit-form">
+                            <form action="{{ url_for('config') }}" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="action" value="edit">
+                                <input type="hidden" name="old_category" value="{{ category.name }}">
+                                <input type="hidden" name="old_title" value="{{ item.title }}">
+                                <select name="new_category" required>
+                                    {% for cat in categories %}
+                                        <option value="{{ cat.name }}" {% if cat.name == category.name %}selected{% endif %}>{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="text" name="new_title" value="{{ item.title }}" required>
+                                <input type="url" name="new_url" value="{{ item.url }}" required>
+                                <input type="file" name="new_icon" accept="image/*">
+                                <button type="submit">保存修改</button>
+                                <button type="button" onclick="toggleEditForm('{{ category.name }}-{{ loop.index }}')">取消</button>
+                            </form>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
         {% endfor %}
     </div>
+
+    <script>
+        function toggleEditForm(id) {
+            var form = document.getElementById('editForm-' + id);
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded and parsed');
+        });
+    </script>
 </body>
 </html>
