@@ -33,6 +33,11 @@
           "title": "subhd",
           "icon": "img/subhd.png",
           "url": "https://subhd.tv/"
+        },
+        {
+          "title": "百度百科",
+          "icon": "img/baike-icon.svg",
+          "url": "https://baike.baidu.com/"
         }
       ]
     },
@@ -148,11 +153,6 @@
           "url": "https://tieba.baidu.com/"
         },
         {
-          "title": "斗鱼",
-          "icon": "img/douyu.png",
-          "url": "https://www.douyu.com/directory/myFollow"
-        },
-        {
           "title": "微博",
           "icon": "img/weibo.png",
           "url": "https://www.weibo.com/"
@@ -161,7 +161,7 @@
           "title": "漫画柜",
           "icon": "img/manhuagui.ico",
           "url": "https://tw.manhuagui.com/user/book/shelf/1"
-        },        
+        },
         {
           "title": "网络剪切板",
           "icon": "img/netcut.ico",

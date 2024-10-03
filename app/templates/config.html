@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>配置管理</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <h2>添加新项目</h2>
+        <form action="{{ url_for('config') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="add">
+            <select name="category" required>
+                {% for category in categories %}
+                    <option value="{{ category.name }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="title" placeholder="标题" required>
+            <input type="url" name="url" placeholder="URL" required>
+            <input type="file" name="icon" accept="image/*">
+            <button type="submit">添加</button>
+        </form>
+        
+        <h2>现有项目</h2>
+        {% for category in categories %}
+            <h3>{{ category.name }}</h3>
+            <ul>
+                {% for item in category.nav_items %}
+                    <li>
+                        {{ item.title }} - {{ item.url }}
+                        <form action="{{ url_for('config') }}" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="category" value="{{ category.name }}">
+                            <input type="hidden" name="title" value="{{ item.title }}">
+                            <button type="submit" onclick="return confirm('确定要删除这个项目吗？');">删除</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div>
+</body>
+</html>
