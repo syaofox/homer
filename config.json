@@ -122,11 +122,6 @@
           "url": "http://10.10.10.2:8000/p"
         },
         {
-          "title": "TL-WDR7650",
-          "icon": "fas fa-wifi",
-          "url": "http://10.10.10.1"
-        },
-        {
           "title": "Transmission",
           "icon": "img/transmission.png",
           "url": "http://10.10.10.2:9091/transmission/web/"
@@ -196,6 +191,11 @@
           "title": "谷歌翻译",
           "icon": "img/gtranslate.ico",
           "url": "https://translate.google.com/?hl=zh-CN&sl=auto&tl=en&op=translate"
+        },
+        {
+          "title": "SSRDOG导航",
+          "icon": "img/ssrdog.ico",
+          "url": "https://dog.hosbbq.com/"
         }
       ]
     },
@@ -232,6 +232,21 @@
           "title": "绅士漫画",
           "icon": "img/wnacg.ico",
           "url": "https://wnacg.com/albums-index-cate-3.html"
+        },
+        {
+          "title": "爱妹子",
+          "icon": "img/aimeizi.ico",
+          "url": "https://xx.knit.bid/"
+        },
+        {
+          "title": "新美图录",
+          "icon": "fas fa-link",
+          "url": "https://www.xinmeitulu.com/"
+        },
+        {
+          "title": "Photos18",
+          "icon": "img/photos18.png",
+          "url": "https://www.photos18.com/zh-hans"
         }
       ]
     }
