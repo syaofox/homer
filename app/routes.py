@@ -1,7 +1,7 @@
 import json
 import os
 
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for, jsonify
 from werkzeug.utils import secure_filename
 
 from app import app
@@ -142,3 +142,19 @@ def config():
         for category in config["categories"]
     ]
     return render_template("config.html", categories=categories)
+
+
+@app.route('/search')
+def search():
+    search_term = request.args.get('term', '').lower()
+    
+    with open("config.json", "r", encoding="utf-8") as f:
+        config = json.load(f)
+    
+    results = []
+    for category in config['categories']:
+        for item in category['items']:
+            if search_term in item['title'].lower() or search_term in item['url'].lower():
+                results.append(item)
+    
+    return jsonify(results)

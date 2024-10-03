@@ -99,6 +99,11 @@
           "title": "海螺",
           "icon": "img/hailuo.png",
           "url": "https://hailuoai.com/"
+        },
+        {
+          "title": "百小应",
+          "icon": "img/baixiaoying.png",
+          "url": "https://ying.baichuan-ai.com/chat?sid=6579163"
         }
       ]
     },
@@ -196,6 +201,11 @@
           "title": "SSRDOG导航",
           "icon": "img/ssrdog.ico",
           "url": "https://dog.hosbbq.com/"
+        },
+        {
+          "title": "一刻电影",
+          "icon": "img/yike.ico",
+          "url": "https://www.yikedy.cc/"
         }
       ]
     },
@@ -247,6 +257,11 @@
           "title": "Photos18",
           "icon": "img/photos18.png",
           "url": "https://www.photos18.com/zh-hans"
+        },
+        {
+          "title": "DMM",
+          "icon": "img/dmm.ico",
+          "url": "https://www.dmm.co.jp/top/"
         }
       ]
     }
