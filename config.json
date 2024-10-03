@@ -6,32 +6,32 @@
       "items": [
         {
           "title": "发布描述",
-          "icon": "fas fa-file-alt",
+          "icon": "img/tencentdoc.png",
           "url": "https://docs.qq.com/sheet/DZlpCSnlxcUVFZ1hj?tab=BB08J2"
         },
         {
           "title": "片源列表",
-          "icon": "fas fa-list",
+          "icon": "img/tencentdoc.png",
           "url": "https://docs.qq.com/sheet/DV3FzRnFkd1lwekhs?tab=q6pgxn"
         },
         {
           "title": "豆瓣电影",
-          "icon": "fas fa-film",
+          "icon": "img/douban.ico",
           "url": "https://movie.douban.com/"
         },
         {
           "title": "Btdigg",
-          "icon": "fas fa-search",
+          "icon": "img/btdigg.png",
           "url": "https://www.btdig.com"
         },
         {
           "title": "海盗湾",
-          "icon": "fas fa-ship",
+          "icon": "img/thepriatebay.ico",
           "url": "https://thepiratebay.org/"
         },
         {
           "title": "subhd",
-          "icon": "fas fa-closed-captioning",
+          "icon": "img/subhd.png",
           "url": "https://subhd.tv/"
         }
       ]
@@ -42,42 +42,42 @@
       "items": [
         {
           "title": "ChatGPT",
-          "icon": "fas fa-comment-dots",
+          "icon": "img/chatgpt.ico",
           "url": "https://chatgpt.com/"
         },
         {
           "title": "通义千问",
-          "icon": "fas fa-brain",
+          "icon": "img/tongyi.png",
           "url": "https://tongyi.aliyun.com/"
         },
         {
           "title": "秘塔写作猫",
-          "icon": "fas fa-pen-fancy",
+          "icon": "img/xiezuocat.ico",
           "url": "https://xiezuocat.com/#/"
         },
         {
           "title": "DeepSeek Coder",
-          "icon": "fas fa-code",
+          "icon": "img/deepseek.svg",
           "url": "https://coder.deepseek.com/"
         },
         {
           "title": "文心一言",
-          "icon": "fas fa-comment-alt",
+          "icon": "img/wxyy.ico",
           "url": "https://yiyan.baidu.com/"
         },
         {
           "title": "智谱清言",
-          "icon": "fas fa-lightbulb",
+          "icon": "img/zhipu.png",
           "url": "https://chatglm.cn/main/alltoolsdetail?lang=zh"
         },
         {
           "title": "豆包",
-          "icon": "fas fa-box",
+          "icon": "img/doubao.png",
           "url": "https://doubao.com/"
         },
         {
           "title": "Kimi",
-          "icon": "fas fa-robot",
+          "icon": "img/kimi.ico",
           "url": "https://kimi.com/"
         },
         {
@@ -113,7 +113,7 @@
         },
         {
           "title": "Transmission",
-          "icon": "fas fa-download",
+          "icon": "img/transmission.png",
           "url": "http://10.10.10.2:9091/transmission/web/"
         }
       ]
@@ -124,93 +124,83 @@
       "items": [
         {
           "title": "Syaofox's Elysion",
-          "icon": "fas fa-home",
+          "icon": "img/syaofox.png",
           "url": "https://syaofox.github.io/"
         },
         {
           "title": "Youtube",
-          "icon": "fab fa-youtube",
+          "icon": "img/youtube.png",
           "url": "https://www.youtube.com/"
         },
         {
           "title": "哔哩哔哩",
-          "icon": "fas fa-play-circle",
+          "icon": "img/bilibili.png",
           "url": "https://www.bilibili.com/"
         },
         {
           "title": "知乎",
-          "icon": "fas fa-question-circle",
+          "icon": "img/zhihu.png",
           "url": "https://www.zhihu.com/"
         },
         {
           "title": "贴吧",
-          "icon": "fas fa-comments",
+          "icon": "img/tieba.png",
           "url": "https://tieba.baidu.com/"
         },
         {
           "title": "斗鱼",
-          "icon": "fas fa-gamepad",
+          "icon": "img/douyu.png",
           "url": "https://www.douyu.com/directory/myFollow"
         },
         {
           "title": "微博",
-          "icon": "fab fa-weibo",
+          "icon": "img/weibo.png",
           "url": "https://www.weibo.com/"
         },
         {
           "title": "漫画柜",
-          "icon": "fas fa-book-open",
+          "icon": "img/manhuagui.ico",
           "url": "https://tw.manhuagui.com/user/book/shelf/1"
-        },
-        {
-          "title": "IP111",
-          "icon": "fas fa-network-wired",
-          "url": "http://ip111.cn/"
-        },
-        {
-          "title": "Btdigg",
-          "icon": "fas fa-search",
-          "url": "https://www.btdig.com"
-        },
+        },        
         {
           "title": "网络剪切板",
-          "icon": "fas fa-clipboard",
+          "icon": "img/netcut.ico",
           "url": "https://netcut.cn/syaofox"
         }
       ]
     },
     {
       "name": "成人网站",
-      "icon": "fas fa-heart",
+      "icon": "img/heart.png",
       "items": [
         {
           "title": "JAVDB",
-          "icon": "fas fa-database",
+          "icon": "img/javdb.png",
           "url": "https://javdb.com/"
         },
         {
           "title": "Pornbay",
-          "icon": "fas fa-anchor",
+          "icon": "img/pornbay.ico",
           "url": "https://pornbay.org/torrents.php?filter_cat[51]=1"
         },
         {
           "title": "MrDeepFakes",
-          "icon": "fas fa-mask",
+          "icon": "img/mrdeepfakes.ico",
           "url": "https://mrdeepfakes.com/my/subscriptions"
         },
         {
           "title": "Pornhub",
-          "icon": "fas fa-video",
+          "icon": "img/pornhub.png",
           "url": "https://www.pornhub.com/"
         },
         {
           "title": "18Comic",
-          "icon": "fas fa-book",
+          "icon": "img/18comic.ico",
           "url": "https://18comic.vip/"
         },
         {
           "title": "绅士漫画",
-          "icon": "fas fa-paint-brush",
+          "icon": "img/wnacg.ico",
           "url": "https://wnacg.com/albums-index-cate-3.html"
         }
       ]
