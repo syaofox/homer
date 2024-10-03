@@ -103,6 +103,30 @@ def config():
             
             flash('项目已删除', 'success')
         
+        elif action in ['move_up', 'move_down']:
+            category_name = request.form.get('category')
+            item_title = request.form.get('title')
+            
+            with open('config.json', 'r+', encoding='utf-8') as f:
+                config = json.load(f)
+                for category in config['categories']:
+                    if category['name'] == category_name:
+                        items = category['items']
+                        for i, item in enumerate(items):
+                            if item['title'] == item_title:
+                                if action == 'move_up' and i > 0:
+                                    items[i], items[i-1] = items[i-1], items[i]
+                                elif action == 'move_down' and i < len(items) - 1:
+                                    items[i], items[i+1] = items[i+1], items[i]
+                                break
+                        break
+                
+                f.seek(0)
+                json.dump(config, f, ensure_ascii=False, indent=2)
+                f.truncate()
+            
+            flash('项目顺序已更新', 'success')
+        
         return redirect(url_for('config'))
     
     with open('config.json', 'r', encoding='utf-8') as f:

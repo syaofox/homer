@@ -58,6 +58,18 @@
                             <input type="hidden" name="title" value="{{ item.title }}">
                             <button type="submit" onclick="return confirm('确定要删除这个项目吗？');">删除</button>
                         </form>
+                        <form action="{{ url_for('config') }}" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="move_up">
+                            <input type="hidden" name="category" value="{{ category.name }}">
+                            <input type="hidden" name="title" value="{{ item.title }}">
+                            <button type="submit" {% if loop.first %}disabled{% endif %}>上移</button>
+                        </form>
+                        <form action="{{ url_for('config') }}" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="move_down">
+                            <input type="hidden" name="category" value="{{ category.name }}">
+                            <input type="hidden" name="title" value="{{ item.title }}">
+                            <button type="submit" {% if loop.last %}disabled{% endif %}>下移</button>
+                        </form>
                         <div id="editForm-{{ category.name }}-{{ loop.index }}" class="edit-form">
                             <form action="{{ url_for('config') }}" method="post" enctype="multipart/form-data">
                                 <input type="hidden" name="action" value="edit">
