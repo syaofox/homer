@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人导航</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>我的个人导航</h1>
+        {% for category in categories %}
+        <h2>{{ category.name }}</h2>
+        <div class="nav-grid">
+            {% for item in category.nav_items %}
+            <a href="{{ item.url }}" class="nav-item" target="_blank">
+                {% if item.icon.startswith('fas ') or item.icon.startswith('fab ') %}
+                    <i class="{{ item.icon }}"></i>
+                {% else %}
+                    <img src="{{ url_for('static', filename=item.icon) }}" alt="{{ item.title }}" class="icon-img">
+                {% endif %}
+                <span>{{ item.title }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
