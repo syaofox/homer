@@ -35,7 +35,7 @@
           "url": "https://subhd.tv/"
         },
         {
-          "title": "哔哩哔哩",
+          "title": "B站创作者中心",
           "icon": "img/bilibili.ico",
           "url": "https://member.bilibili.com/platform/home?spm_id_from=333.1007.0.0"
         },
@@ -117,14 +117,14 @@
           "url": "http://10.10.10.2"
         },
         {
-          "title": "Cinema",
-          "icon": "fas fa-film",
+          "title": "Jellyfin",
+          "icon": "img/jellyfin.png",
           "url": "http://10.10.10.2:8000/v"
         },
         {
           "title": "Moments",
-          "icon": "fas fa-images",
-          "url": "http://10.10.10.2:8000/p"
+          "icon": "img/mtphoto.png",
+          "url": "http://10.10.10.2:8063"
         },
         {
           "title": "Transmission",
@@ -206,6 +206,16 @@
           "title": "一刻电影",
           "icon": "img/yike.ico",
           "url": "https://www.yikedy.cc/"
+        },
+        {
+          "title": "v2ex",
+          "icon": "img/v2ex.ico",
+          "url": "https://www.v2ex.com/"
+        },
+        {
+          "title": "Github",
+          "icon": "img/github.png",
+          "url": "https://github.com/"
         }
       ]
     },

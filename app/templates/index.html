@@ -41,5 +41,22 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // 添加自动聚焦和键盘事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            
+            // 页面加载完成后自动聚焦到搜索框
+            searchInput.focus();
+
+            // 监听整个文档的键盘事件
+            document.addEventListener('keydown', function(event) {
+                // 如果按下的不是功能键（如Ctrl、Alt等），且搜索框没有聚焦，则聚焦到搜索框
+                if (!event.ctrlKey && !event.altKey && !event.metaKey && document.activeElement !== searchInput) {
+                    searchInput.focus();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
