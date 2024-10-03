@@ -33,6 +33,21 @@
           "title": "subhd",
           "icon": "img/subhd.png",
           "url": "https://subhd.tv/"
+        },
+        {
+          "title": "哔哩哔哩",
+          "icon": "img/bilibili.ico",
+          "url": "https://member.bilibili.com/platform/home?spm_id_from=333.1007.0.0"
+        },
+        {
+          "title": "抖音创作者中心",
+          "icon": "img/douyin.ico",
+          "url": "https://creator.douyin.com/creator-micro/home"
+        },
+        {
+          "title": "百家号",
+          "icon": "img/baijiahao.png",
+          "url": "https://baijiahao.baidu.com/"
         }
       ]
     },
@@ -166,6 +181,21 @@
           "title": "百度百科",
           "icon": "img/baike-icon.png",
           "url": "https://baike.baidu.com/"
+        },
+        {
+          "title": "Yandex",
+          "icon": "img/yandex.ico",
+          "url": "https://yandex.com/images/"
+        },
+        {
+          "title": "Civitai",
+          "icon": "img/civitai.ico",
+          "url": "https://civitai.com/"
+        },
+        {
+          "title": "谷歌翻译",
+          "icon": "img/gtranslate.ico",
+          "url": "https://translate.google.com/?hl=zh-CN&sl=auto&tl=en&op=translate"
         }
       ]
     },
