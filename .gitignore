@@ -112,6 +112,5 @@ venv.bak/
 Thumbs.db
 
 # 项目特定
-config.json
 *.db
 *.sqlite
