@@ -1,5 +1,7 @@
 import json
 import os
+from pypinyin import lazy_pinyin
+import re
 
 from flask import flash, redirect, render_template, request, url_for, jsonify
 from werkzeug.utils import secure_filename
@@ -154,7 +156,14 @@ def search():
     results = []
     for category in config['categories']:
         for item in category['items']:
-            if search_term in item['title'].lower() or search_term in item['url'].lower():
+            title = item['title']
+            url = item['url']
+            title_pinyin = ''.join(lazy_pinyin(title))
+            
+            if (search_term in title.lower() or 
+                search_term in url.lower() or 
+                search_term in title_pinyin.lower() or
+                re.search(search_term, title_pinyin.lower())):
                 results.append(item)
     
     return jsonify(results)

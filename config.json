@@ -48,6 +48,11 @@
           "title": "百家号",
           "icon": "img/baijiahao.png",
           "url": "https://baijiahao.baidu.com/"
+        },
+        {
+          "title": "股市假期",
+          "icon": "img/tdx.ico",
+          "url": "https://www.tdx.com.cn/url/holiday/"
         }
       ]
     },
@@ -119,7 +124,7 @@
         {
           "title": "Jellyfin",
           "icon": "img/jellyfin.png",
-          "url": "http://10.10.10.2:8000/v"
+          "url": "http://10.10.10.2:8096"
         },
         {
           "title": "Moments",
@@ -216,6 +221,21 @@
           "title": "Github",
           "icon": "img/github.png",
           "url": "https://github.com/"
+        },
+        {
+          "title": "临时邮箱",
+          "icon": "img/linshiyouxiang.ico",
+          "url": "https://www.linshiyouxiang.net/"
+        },
+        {
+          "title": "wormhole",
+          "icon": "img/wormhole.webp",
+          "url": "https://wormhole.app/"
+        },
+        {
+          "title": "截图找动漫",
+          "icon": "img/trace.png",
+          "url": "https://trace.moe/"
         }
       ]
     },
@@ -272,6 +292,11 @@
           "title": "DMM",
           "icon": "img/dmm.ico",
           "url": "https://www.dmm.co.jp/top/"
+        },
+        {
+          "title": "supjav",
+          "icon": "img/supjav.png",
+          "url": "https://supjav.com/zh/"
         }
       ]
     }
