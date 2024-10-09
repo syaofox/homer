@@ -56,6 +56,17 @@
                     searchInput.focus();
                 }
             });
+
+            // 添加搜索框的回车键事件监听
+            searchInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const firstResult = document.querySelector('#search-results .nav-item');
+                    if (firstResult) {
+                        window.location.href = firstResult.href;
+                    }
+                }
+            });
         });
     </script>
 </body>
