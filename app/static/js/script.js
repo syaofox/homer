@@ -28,7 +28,7 @@ function displaySearchResults(results) {
         results.forEach(function(item) {
             var $item = $('<a>')
                 .attr('href', item.url)
-                .attr('target', '_blank')
+                // .attr('target', '_blank')
                 .addClass('nav-item');
 
             if (item.icon.startsWith('fas ') || item.icon.startsWith('fab ')) {

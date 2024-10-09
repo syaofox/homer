@@ -53,6 +53,11 @@
           "title": "股市假期",
           "icon": "img/tdx.ico",
           "url": "https://www.tdx.com.cn/url/holiday/"
+        },
+        {
+          "title": "笔记",
+          "icon": "img/github.png",
+          "url": "https://github.com/syaofox/notes/issues"
         }
       ]
     },
@@ -236,6 +241,11 @@
           "title": "截图找动漫",
           "icon": "img/trace.png",
           "url": "https://trace.moe/"
+        },
+        {
+          "title": "在线图片处理",
+          "icon": "img/vp.png",
+          "url": "https://online.visual-paradigm.com/cn/photo-effects-studio/photo-effect-tools/"
         }
       ]
     },
@@ -271,7 +281,7 @@
         {
           "title": "绅士漫画",
           "icon": "img/wnacg.ico",
-          "url": "https://wnacg.com/albums-index-cate-3.html"
+          "url": "https://www.wnacg.com/"
         },
         {
           "title": "爱妹子",
