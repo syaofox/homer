@@ -1,2 +1,1 @@
-@echo off
-venv\python.exe run.py
+uv run python .\main.py
