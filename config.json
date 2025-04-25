@@ -30,6 +30,11 @@
           "url": "https://thepiratebay.org/"
         },
         {
+          "title": "吴签磁力",
+          "icon": "img/favicon_1.png",
+          "url": "https://wuqiangb.top/"
+        },
+        {
           "title": "subhd",
           "icon": "img/subhd.png",
           "url": "https://subhd.tv/"
@@ -55,9 +60,29 @@
           "url": "https://www.tdx.com.cn/url/holiday/"
         },
         {
-          "title": "笔记",
+          "title": "notes",
           "icon": "img/github.png",
           "url": "https://github.com/syaofox/notes/issues"
+        },
+        {
+          "title": "一刻电影",
+          "icon": "img/yikedy.ico",
+          "url": "https://www.yikedy.cc/"
+        },
+        {
+          "title": "跑分",
+          "icon": "img/000syaofox.png",
+          "url": "http://10.10.10.2:8501/"
+        },
+        {
+          "title": "抖音违禁词",
+          "icon": "img/favicon_2.ico",
+          "url": "https://www.doucici.com/"
+        },
+        {
+          "title": "无限邮",
+          "icon": "img/favicon_3.ico",
+          "url": "https://www.2925.com/login/"
         }
       ]
     },
@@ -86,9 +111,14 @@
           "url": "https://doubao.com/"
         },
         {
-          "title": "DeepSeek Coder",
+          "title": "火山",
+          "icon": "img/favicon.52bcaa41.png",
+          "url": "https://console.volcengine.com/ark/region:ark+cn-beijing/experience/chat"
+        },
+        {
+          "title": "DeepSeek",
           "icon": "img/deepseek.svg",
-          "url": "https://coder.deepseek.com/"
+          "url": "https://deepseek.com/"
         },
         {
           "title": "文心一言",
@@ -114,6 +144,36 @@
           "title": "百小应",
           "icon": "img/baixiaoying.png",
           "url": "https://ying.baichuan-ai.com/chat?sid=6579163"
+        },
+        {
+          "title": "grok",
+          "icon": "img/favicon.ico",
+          "url": "https://grok.com/?referrer=website"
+        },
+        {
+          "title": "gemini",
+          "icon": "img/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+          "url": "https://gemini.google.com/app"
+        },
+        {
+          "title": "元宝",
+          "icon": "img/logo_1.png",
+          "url": "https://yuanbao.tencent.com/chat/naQivTmsDa"
+        },
+        {
+          "title": "千问",
+          "icon": "img/favicon.png",
+          "url": "https://chat.qwen.ai/"
+        },
+        {
+          "title": "aistudio",
+          "icon": "img/ai_studio_favicon_32x32.png",
+          "url": "https://aistudio.google.com/prompts/new_chat"
+        },
+        {
+          "title": "问小白",
+          "icon": "img/new_favicon.ico",
+          "url": "https://www.wenxiaobai.com/chat/200006"
         }
       ]
     },
@@ -140,6 +200,16 @@
           "title": "Transmission",
           "icon": "img/transmission.png",
           "url": "http://10.10.10.2:9091/transmission/web/"
+        },
+        {
+          "title": "syncthing",
+          "icon": "img/syncthing.png",
+          "url": "http://127.0.0.1:8384/#device-advanced"
+        },
+        {
+          "title": "听书",
+          "icon": "img/sunket_border_704x704.jpg",
+          "url": "http://10.10.10.2:5000/"
         }
       ]
     },
@@ -246,6 +316,16 @@
           "title": "在线图片处理",
           "icon": "img/vp.png",
           "url": "https://online.visual-paradigm.com/cn/photo-effects-studio/photo-effect-tools/"
+        },
+        {
+          "title": "pinterest",
+          "icon": "img/favicon_48x48-7470a30d.png",
+          "url": "https://www.pinterest.com/"
+        },
+        {
+          "title": "我的漫画",
+          "icon": "img/favicon.png",
+          "url": "https://mycomic.com/"
         }
       ]
     },
@@ -294,7 +374,7 @@
           "url": "https://www.xinmeitulu.com/"
         },
         {
-          "title": "Photos18",
+          "title": "色情图片网",
           "icon": "img/photos18.png",
           "url": "https://www.photos18.com/zh-hans"
         },
@@ -307,6 +387,31 @@
           "title": "supjav",
           "icon": "img/supjav.png",
           "url": "https://supjav.com/zh/"
+        },
+        {
+          "title": "Hanime1",
+          "icon": "img/hanime1.png",
+          "url": "https://hanime1.me/"
+        },
+        {
+          "title": "cool18",
+          "icon": "img/cool18.ico",
+          "url": "https://www.cool18.com/bbs/index.php"
+        },
+        {
+          "title": "GreatXpic",
+          "icon": "img/greatxpic.ico",
+          "url": "https://cn.greatxpic.com/"
+        },
+        {
+          "title": "MissAV",
+          "icon": "img/favicon_1.ico",
+          "url": "https://missav.ai/"
+        },
+        {
+          "title": "南+",
+          "icon": "img/favicon_4.ico",
+          "url": "https://www.blue-plus.net/index.php"
         }
       ]
     }
