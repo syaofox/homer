@@ -35,7 +35,7 @@ function displaySearchResults(results) {
                 $item.append($('<i>').addClass(item.icon));
             } else {
                 $item.append($('<img>')
-                    .attr('src', '/static/' + item.icon)
+                    .attr('src', '/config/' + item.icon)
                     .attr('alt', item.title)
                     .addClass('icon-img'));
             }

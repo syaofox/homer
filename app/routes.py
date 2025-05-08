@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from app import app
 
 CONFIG_PATH = "config/config.json"
+CONFIG_IMG_PATH = "config/img"
 
 @app.route("/")
 def index():
@@ -33,7 +34,7 @@ def config():
 
             if icon and icon.filename:
                 filename = secure_filename(icon.filename)
-                icon.save(os.path.join(app.static_folder, "img", filename))  # type: ignore
+                icon.save(os.path.join(CONFIG_IMG_PATH, filename))
                 icon_path = f"img/{filename}"
             else:
                 icon_path = "fas fa-link"  # 默认图标
@@ -72,7 +73,7 @@ def config():
                                 if new_icon and new_icon.filename:
                                     filename = secure_filename(new_icon.filename)
                                     new_icon.save(
-                                        os.path.join(app.static_folder, "img", filename)  # type: ignore
+                                        os.path.join(CONFIG_IMG_PATH, filename)
                                     )
                                     item["icon"] = f"img/{filename}"
                                 if old_category != new_category:
@@ -138,7 +139,7 @@ def config():
 
         return redirect(url_for("config"))
 
-    with open("confg/config.json", "r", encoding="utf-8") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         config = json.load(f)
     categories = [
         {"name": category["name"], "nav_items": category["items"]}
