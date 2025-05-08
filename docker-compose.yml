@@ -1,0 +1,23 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./config:/app/config 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/", "||", "exit", "1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+# 定义volumes
+volumes:
+  config:
+    # 这是一个命名卷，Docker会自动管理 
