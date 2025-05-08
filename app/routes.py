@@ -8,10 +8,11 @@ from werkzeug.utils import secure_filename
 
 from app import app
 
+CONFIG_PATH = "config/config.json"
 
 @app.route("/")
 def index():
-    with open("config.json", "r", encoding="utf-8") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         config = json.load(f)
     categories = [
         {"name": category["name"], "nav_items": category["items"]}
@@ -37,7 +38,7 @@ def config():
             else:
                 icon_path = "fas fa-link"  # 默认图标
 
-            with open("config.json", "r+", encoding="utf-8") as f:
+            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
                 config = json.load(f)
                 for cat in config["categories"]:
                     if cat["name"] == category:
@@ -59,7 +60,7 @@ def config():
             new_url = request.form.get("new_url")
             new_icon = request.files.get("new_icon")
 
-            with open("config.json", "r+", encoding="utf-8") as f:
+            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
                 config = json.load(f)
                 item_to_move = None
                 for category in config["categories"]:
@@ -96,7 +97,7 @@ def config():
             category_name = request.form.get("category")
             title = request.form.get("title")
 
-            with open("config.json", "r+", encoding="utf-8") as f:
+            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
                 config = json.load(f)
                 for category in config["categories"]:
                     if category["name"] == category_name:
@@ -115,7 +116,7 @@ def config():
             category_name = request.form.get("category")
             item_title = request.form.get("title")
 
-            with open("config.json", "r+", encoding="utf-8") as f:
+            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
                 config = json.load(f)
                 for category in config["categories"]:
                     if category["name"] == category_name:
@@ -137,7 +138,7 @@ def config():
 
         return redirect(url_for("config"))
 
-    with open("config.json", "r", encoding="utf-8") as f:
+    with open("confg/config.json", "r", encoding="utf-8") as f:
         config = json.load(f)
     categories = [
         {"name": category["name"], "nav_items": category["items"]}
@@ -150,7 +151,7 @@ def config():
 def search():
     search_term = request.args.get('term', '').lower()
     
-    with open("config.json", "r", encoding="utf-8") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         config = json.load(f)
     
     results = []
