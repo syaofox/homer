@@ -124,10 +124,17 @@
             // 页面加载完成后自动聚焦到搜索框
             searchInput.focus();
 
-            // 监听整个文档的键盘事件
+            // 监听整个文档的键盘事件（在弹窗或输入框聚焦时不抢焦点）
             document.addEventListener('keydown', function(event) {
-                // 如果按下的不是功能键（如Ctrl、Alt等），且搜索框没有聚焦，则聚焦到搜索框
-                if (!event.ctrlKey && !event.altKey && !event.metaKey && document.activeElement !== searchInput) {
+                if (event.ctrlKey || event.altKey || event.metaKey) return;
+                const active = document.activeElement;
+                const tag = active && active.tagName ? active.tagName.toLowerCase() : '';
+                // 若有弹窗或右键菜单显示，或当前正在输入，则不改变焦点
+                const modalVisible = typeof $ !== 'undefined' && $('#edit-modal').is(':visible');
+                const menuVisible = typeof $ !== 'undefined' && $('#context-menu').is(':visible');
+                if (modalVisible || menuVisible) return;
+                if (tag === 'input' || tag === 'textarea' || tag === 'select' || active && active.isContentEditable) return;
+                if (document.activeElement !== searchInput) {
                     searchInput.focus();
                 }
             });

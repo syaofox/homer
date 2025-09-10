@@ -200,6 +200,11 @@
           "title": "听书",
           "icon": "img/sunket_border_704x704.jpg",
           "url": "http://10.10.10.2:5000/"
+        },
+        {
+          "title": "bt",
+          "icon": "img/comfyui.png",
+          "url": "http://10.10.10.8:8080/"
         }
       ]
     },

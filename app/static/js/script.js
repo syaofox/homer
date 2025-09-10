@@ -186,6 +186,8 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
     $formJq.find('input[name="icon_input"]').val('');
 
     $modal.show();
+    // 弹窗打开后将焦点置于标题输入框
+    setTimeout(function(){ $formJq.find('input[name="title_input"]').trigger('focus'); }, 0);
 
     function close() { $modal.hide(); }
     $('.modal-close, .modal-cancel').off('click').on('click', function() { close(); });
