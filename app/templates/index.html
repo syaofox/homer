@@ -27,7 +27,7 @@
             <h2>{{ category.name }}</h2>
             <div class="nav-grid">
                 {% for item in category.nav_items %}
-                <a href="{{ item.url }}" class="nav-item">
+                <a href="{{ item.url }}" class="nav-item" data-category="{{ category.name }}" data-title="{{ item.title }}">
                     {% if item.icon.startswith('fas ') or item.icon.startswith('fab ') %}
                         <i class="{{ item.icon }}"></i>
                     {% else %}
@@ -36,11 +36,37 @@
                     <span>{{ item.title }}</span>
                 </a>
                 {% endfor %}
+                <!-- Add button tile for this category -->
+                <a href="#" class="nav-item add-item" data-category="{{ category.name }}" title="新增">
+                    <i class="fas fa-plus"></i>
+                    <span>新增</span>
+                </a>
             </div>
             {% endfor %}
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- Context menu -->
+    <div id="context-menu" class="context-menu" style="display:none;">
+        <ul>
+            <li data-action="edit">编辑</li>
+            <li data-action="delete">删除</li>
+        </ul>
+    </div>
+    <!-- Hidden form for POSTing to /config -->
+    <form id="configForm" action="{{ url_for('config') }}" method="post" enctype="multipart/form-data" style="display:none;">
+        <input type="hidden" name="action" value="">
+        <input type="hidden" name="category" value="">
+        <input type="hidden" name="title" value="">
+        <input type="hidden" name="url" value="">
+        <input type="hidden" name="old_category" value="">
+        <input type="hidden" name="new_category" value="">
+        <input type="hidden" name="old_title" value="">
+        <input type="hidden" name="new_title" value="">
+        <input type="hidden" name="new_url" value="">
+        <input type="file" name="icon" accept="image/*">
+        <input type="file" name="new_icon" accept="image/*">
+    </form>
     <script>
         // 添加自动聚焦和键盘事件监听
         document.addEventListener('DOMContentLoaded', function() {

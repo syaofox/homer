@@ -31,9 +31,9 @@
         {% endwith %}
         
         <h2>添加新项目</h2>
-        <form action="{{ url_for('config') }}" method="post" enctype="multipart/form-data">
+        <form id="addForm" action="{{ url_for('config') }}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add">
-            <select name="category" required>
+            <select name="category" id="addCategory" required>
                 {% for category in categories %}
                     <option value="{{ category.name }}">{{ category.name }}</option>
                 {% endfor %}
@@ -104,7 +104,40 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM fully loaded and parsed');
+            // Read query params
+            const params = new URLSearchParams(window.location.search);
+            const addCat = params.get('add_category');
+            if (addCat) {
+                const sel = document.getElementById('addCategory');
+                if (sel) {
+                    for (let i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === addCat) {
+                            sel.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    // Scroll to add form
+                    const addForm = document.getElementById('addForm');
+                    if (addForm) addForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            const editCat = params.get('edit_category');
+            const editTitle = params.get('edit_title');
+            if (editCat && editTitle) {
+                // Find the matching edit form div id using category.name and loop.index pattern
+                // We don't have indexes here, so iterate all edit forms and match hidden inputs
+                const editForms = document.querySelectorAll('[id^="editForm-"]');
+                for (const formWrapper of editForms) {
+                    const hiddenOldCat = formWrapper.querySelector('input[name="old_category"]');
+                    const hiddenOldTitle = formWrapper.querySelector('input[name="old_title"]');
+                    if (hiddenOldCat && hiddenOldTitle && hiddenOldCat.value === editCat && hiddenOldTitle.value === editTitle) {
+                        formWrapper.style.display = 'block';
+                        formWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        break;
+                    }
+                }
+            }
         });
     </script>
 </body>

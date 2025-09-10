@@ -321,11 +321,6 @@
           "title": "pinterest",
           "icon": "img/favicon_48x48-7470a30d.png",
           "url": "https://www.pinterest.com/"
-        },
-        {
-          "title": "我的漫画",
-          "icon": "img/favicon.png",
-          "url": "https://mycomic.com/"
         }
       ]
     },
