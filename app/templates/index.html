@@ -61,6 +61,47 @@
             <li data-action="delete">删除</li>
         </ul>
     </div>
+    <!-- 编辑/新增 浮动弹窗 -->
+    <div id="edit-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3 id="modal-title">编辑项目</h3>
+            <form id="modalForm" enctype="multipart/form-data">
+                <input type="hidden" name="mode" value="edit">
+                <input type="hidden" name="old_category" value="">
+                <input type="hidden" name="old_title" value="">
+
+                <label>
+                    分类
+                    <select name="category_select" required>
+                        {% for category in categories %}
+                        <option value="{{ category.name }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>
+                    标题
+                    <input type="text" name="title_input" required>
+                </label>
+
+                <label>
+                    URL
+                    <input type="url" name="url_input" required>
+                </label>
+
+                <label>
+                    图标
+                    <input type="file" name="icon_input" accept="image/*">
+                </label>
+
+                <div class="modal-actions">
+                    <button type="submit">保存</button>
+                    <button type="button" class="modal-cancel">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Hidden form for POSTing to /config -->
     <form id="configForm" action="{{ url_for('config') }}" method="post" enctype="multipart/form-data" style="display:none;">
         <input type="hidden" name="action" value="">
