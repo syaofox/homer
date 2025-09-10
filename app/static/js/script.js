@@ -189,7 +189,18 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
     // 弹窗打开后将焦点置于标题输入框
     setTimeout(function(){ $formJq.find('input[name="title_input"]').trigger('focus'); }, 0);
 
-    function close() { $modal.hide(); }
+    // 绑定 Esc 关闭
+    $(document).off('keydown.editmodal').on('keydown.editmodal', function(e){
+        if (e.key === 'Escape') {
+            e.stopPropagation();
+            close();
+        }
+    });
+
+    function close() {
+        $modal.hide();
+        $(document).off('keydown.editmodal');
+    }
     $('.modal-close, .modal-cancel').off('click').on('click', function() { close(); });
 
     $formJq.off('submit').on('submit', function(e) {
