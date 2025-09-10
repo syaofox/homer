@@ -5,6 +5,11 @@
       "icon": "fa fa-server",
       "items": [
         {
+          "title": "跑分",
+          "icon": "img/favicon_4.ico",
+          "url": "http://10.10.10.2:8501/"
+        },
+        {
           "title": "发布描述",
           "icon": "img/tencentdoc.png",
           "url": "https://docs.qq.com/sheet/DZlpCSnlxcUVFZ1hj?tab=BB08J2"
@@ -63,16 +68,6 @@
           "title": "notes",
           "icon": "img/github.png",
           "url": "https://github.com/syaofox/notes/issues"
-        },
-        {
-          "title": "一刻电影",
-          "icon": "img/yikedy.ico",
-          "url": "https://www.yikedy.cc/"
-        },
-        {
-          "title": "跑分",
-          "icon": "img/favicon_4.ico",
-          "url": "http://10.10.10.2:8501/"
         },
         {
           "title": "抖音违禁词",

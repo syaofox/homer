@@ -61,7 +61,7 @@ $(document).ready(function() {
         window.open(url, '_blank');
     });
 
-    // 移动按钮：左移/右移（Ajax 提交到 /config 持久化）
+    // 移动按钮：左移/右移（前端先乐观更新，再 Ajax 持久化）
     $(document).on('click', '.move-btn', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -73,6 +73,30 @@ $(document).ready(function() {
         const isLeft = $(this).hasClass('move-left');
         const action = isLeft ? 'move_up' : 'move_down';
 
+        // 仅在同一分组(nav-grid)内移动，跳过“新增”按钮
+        const $grid = $item.closest('.nav-grid');
+        if ($grid.length === 0) return;
+
+        const $siblings = $grid.find('.nav-item').not('.add-item');
+        const index = $siblings.index($item);
+        let $swapWith = null;
+        if (isLeft) {
+            if (index <= 0) return; // 已经最左边
+            $swapWith = $siblings.eq(index - 1);
+        } else {
+            if (index >= $siblings.length - 1) return; // 已经最右边（不包含新增）
+            $swapWith = $siblings.eq(index + 1);
+        }
+        if ($swapWith && $swapWith.length) {
+            // 乐观交换 DOM
+            if (isLeft) {
+                $item.insertBefore($swapWith);
+            } else {
+                $item.insertAfter($swapWith);
+            }
+        }
+
+        // 后台持久化
         $.ajax({
             url: '/config',
             method: 'POST',
@@ -82,8 +106,18 @@ $(document).ready(function() {
                 title: title
             },
             success: function() {
-                // 保存成功后刷新当前页面即可看到新顺序
-                window.location.reload();
+                // 无需刷新，已乐观更新
+            },
+            error: function() {
+                // 出错时简单回退（再次交换还原）
+                if ($swapWith && $swapWith.length) {
+                    if (isLeft) {
+                        $item.insertAfter($swapWith);
+                    } else {
+                        $item.insertBefore($swapWith);
+                    }
+                }
+                console.error('更新顺序失败');
             }
         });
     });
