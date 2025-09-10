@@ -34,6 +34,7 @@ h1 {
     text-decoration: none;
     color: #333;
     transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
 }
 
 .nav-item:hover {
@@ -49,6 +50,39 @@ h1 {
 .nav-item span {
     font-size: 16px;
     text-align: center;
+}
+
+/* 左右移动控制按钮（悬停显示） */
+.nav-item-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.nav-item:hover .nav-item-controls {
+    opacity: 1;
+}
+
+.move-btn {
+    border: none;
+    background: rgba(255,255,255,0.9);
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.move-btn i {
+    font-size: 14px;
+    color: #333;
+}
+
+.move-btn:hover {
+    background: #f3f3f3;
 }
 
 h2 {

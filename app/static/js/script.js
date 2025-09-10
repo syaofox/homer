@@ -60,6 +60,33 @@ $(document).ready(function() {
         const url = '/config?add_category=' + encodeURIComponent(category);
         window.open(url, '_blank');
     });
+
+    // 移动按钮：左移/右移（Ajax 提交到 /config 持久化）
+    $(document).on('click', '.move-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const $item = $(this).closest('.nav-item');
+        const category = $item.data('category');
+        const title = $item.data('title');
+        if (!category || !title) return;
+
+        const isLeft = $(this).hasClass('move-left');
+        const action = isLeft ? 'move_up' : 'move_down';
+
+        $.ajax({
+            url: '/config',
+            method: 'POST',
+            data: {
+                action: action,
+                category: category,
+                title: title
+            },
+            success: function() {
+                // 保存成功后刷新当前页面即可看到新顺序
+                window.location.reload();
+            }
+        });
+    });
 });
 
 function displaySearchResults(results) {
