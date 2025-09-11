@@ -5,49 +5,19 @@
       "icon": "fa fa-server",
       "items": [
         {
-          "title": "跑分",
-          "icon": "img/favicon_4.ico",
-          "url": "http://10.10.10.2:8501/"
-        },
-        {
           "title": "发布描述",
           "icon": "img/tencentdoc.png",
           "url": "https://docs.qq.com/sheet/DZlpCSnlxcUVFZ1hj?tab=BB08J2"
         },
         {
-          "title": "片源列表",
-          "icon": "img/tencentdoc.png",
-          "url": "https://docs.qq.com/sheet/DV3FzRnFkd1lwekhs?tab=q6pgxn"
+          "title": "抖音违禁词",
+          "icon": "img/favicon_2.ico",
+          "url": "https://www.doucici.com/"
         },
         {
-          "title": "豆瓣电影",
-          "icon": "img/douban.ico",
-          "url": "https://movie.douban.com/"
-        },
-        {
-          "title": "Btdigg",
-          "icon": "img/btdigg.png",
-          "url": "https://www.btdig.com"
-        },
-        {
-          "title": "海盗湾",
-          "icon": "img/thepriatebay.ico",
-          "url": "https://thepiratebay.org/"
-        },
-        {
-          "title": "吴签磁力",
-          "icon": "img/favicon_1.png",
-          "url": "https://wuqiangb.top/"
-        },
-        {
-          "title": "subhd",
-          "icon": "img/subhd.png",
-          "url": "https://subhd.tv/"
-        },
-        {
-          "title": "百家号",
-          "icon": "img/baijiahao.png",
-          "url": "https://baijiahao.baidu.com/"
+          "title": "跑分",
+          "icon": "img/favicon_4.ico",
+          "url": "http://10.10.10.2:8501/"
         },
         {
           "title": "股市假期",
@@ -55,14 +25,44 @@
           "url": "https://www.tdx.com.cn/url/holiday/"
         },
         {
+          "title": "吴签磁力",
+          "icon": "img/favicon_1.png",
+          "url": "https://wuqiangb.top/"
+        },
+        {
           "title": "notes",
           "icon": "img/github.png",
           "url": "https://github.com/syaofox/notes/issues"
         },
         {
-          "title": "抖音违禁词",
-          "icon": "img/favicon_2.ico",
-          "url": "https://www.doucici.com/"
+          "title": "百家号",
+          "icon": "img/baijiahao.png",
+          "url": "https://baijiahao.baidu.com/"
+        },
+        {
+          "title": "豆瓣电影",
+          "icon": "img/douban.ico",
+          "url": "https://movie.douban.com/"
+        },
+        {
+          "title": "片源列表",
+          "icon": "img/tencentdoc.png",
+          "url": "https://docs.qq.com/sheet/DV3FzRnFkd1lwekhs?tab=q6pgxn"
+        },
+        {
+          "title": "海盗湾",
+          "icon": "img/thepriatebay.ico",
+          "url": "https://thepiratebay.org/"
+        },
+        {
+          "title": "subhd",
+          "icon": "img/subhd.png",
+          "url": "https://subhd.tv/"
+        },
+        {
+          "title": "Btdigg",
+          "icon": "img/btdigg.png",
+          "url": "https://www.btdig.com"
         },
         {
           "title": "无限邮",
@@ -76,6 +76,11 @@
       "icon": "fas fa-robot",
       "items": [
         {
+          "title": "豆包",
+          "icon": "img/doubao.png",
+          "url": "https://doubao.com/"
+        },
+        {
           "title": "通义千问",
           "icon": "img/tongyi.png",
           "url": "https://tongyi.aliyun.com/"
@@ -86,9 +91,9 @@
           "url": "https://chatgpt.com/"
         },
         {
-          "title": "豆包",
-          "icon": "img/doubao.png",
-          "url": "https://doubao.com/"
+          "title": "元宝",
+          "icon": "img/logo_1.png",
+          "url": "https://yuanbao.tencent.com/chat/naQivTmsDa"
         },
         {
           "title": "火山",
@@ -116,11 +121,6 @@
           "url": "https://kimi.com/"
         },
         {
-          "title": "海螺",
-          "icon": "img/hailuo.png",
-          "url": "https://hailuoai.com/"
-        },
-        {
           "title": "百小应",
           "icon": "img/baixiaoying.png",
           "url": "https://ying.baichuan-ai.com/chat?sid=6579163"
@@ -136,9 +136,9 @@
           "url": "https://gemini.google.com/app"
         },
         {
-          "title": "元宝",
-          "icon": "img/logo_1.png",
-          "url": "https://yuanbao.tencent.com/chat/naQivTmsDa"
+          "title": "海螺",
+          "icon": "img/hailuo.png",
+          "url": "https://hailuoai.com/"
         },
         {
           "title": "千问",

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -34,14 +35,8 @@
                         <img src="/config/{{ item.icon }}" alt="{{ item.title }}" class="icon-img">
                     {% endif %}
                     <span>{{ item.title }}</span>
-                    <div class="nav-item-controls">
-                        <button class="move-btn move-left" aria-label="左移" type="button">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
-                        <button class="move-btn move-right" aria-label="右移" type="button">
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
+                    <!-- 拖动排序：移除箭头控制按钮 -->
+                    <div class="nav-item-controls" style="display:none;"></div>
                 </a>
                 {% endfor %}
                 <!-- Add button tile for this category -->

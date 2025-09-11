@@ -74,63 +74,31 @@ $(document).ready(function() {
         openEditModal({ mode: 'add', category: category, title: '', url: '' }, null, $(this).closest('.nav-grid'));
     });
 
-    // 移动按钮：左移/右移（前端先乐观更新，再 Ajax 持久化）
-    $(document).on('click', '.move-btn', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const $item = $(this).closest('.nav-item');
-        const category = $item.data('category');
-        const title = $item.data('title');
-        if (!category || !title) return;
-
-        const isLeft = $(this).hasClass('move-left');
-        const action = isLeft ? 'move_up' : 'move_down';
-
-        // 仅在同一分组(nav-grid)内移动，跳过“新增”按钮
-        const $grid = $item.closest('.nav-grid');
-        if ($grid.length === 0) return;
-
-        const $siblings = $grid.find('.nav-item').not('.add-item');
-        const index = $siblings.index($item);
-        let $swapWith = null;
-        if (isLeft) {
-            if (index <= 0) return; // 已经最左边
-            $swapWith = $siblings.eq(index - 1);
-        } else {
-            if (index >= $siblings.length - 1) return; // 已经最右边（不包含新增）
-            $swapWith = $siblings.eq(index + 1);
-        }
-        if ($swapWith && $swapWith.length) {
-            // 乐观交换 DOM
-            if (isLeft) {
-                $item.insertBefore($swapWith);
-            } else {
-                $item.insertAfter($swapWith);
-            }
-        }
-
-        // 后台持久化
-        $.ajax({
-            url: '/config',
-            method: 'POST',
-            data: {
-                action: action,
-                category: category,
-                title: title
+    // 使用 SortableJS 提升拖拽体验
+    $('.nav-grid').each(function(){
+        const grid = this;
+        new Sortable(grid, {
+            animation: 150,
+            delay: 150, // 长按延时，避免误触
+            delayOnTouchOnly: true,
+            ghostClass: 'drag-ghost',
+            chosenClass: 'drag-chosen',
+            dragClass: 'drag-dragging',
+            filter: '.add-item',
+            preventOnFilter: true,
+            onMove: function(evt) {
+                // 禁止将普通卡片拖到“新增”后面
+                return !$(evt.related).hasClass('add-item');
             },
-            success: function() {
-                // 无需刷新，已乐观更新
-            },
-            error: function() {
-                // 出错时简单回退（再次交换还原）
-                if ($swapWith && $swapWith.length) {
-                    if (isLeft) {
-                        $item.insertAfter($swapWith);
-                    } else {
-                        $item.insertBefore($swapWith);
-                    }
+            onEnd: function(evt) {
+                const $grid = $(grid);
+                const category = $grid.prev('h2').text();
+                const order = $grid.find('.nav-item').not('.add-item').map(function(){
+                    return $(this).data('title');
+                }).get();
+                if (category && order.length) {
+                    $.ajax({ url: '/config', method: 'POST', data: { action: 'reorder', category: category, 'order[]': order } });
                 }
-                console.error('更新顺序失败');
             }
         });
     });
@@ -246,10 +214,7 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
                                           : $('<i>').addClass('fas fa-link'));
                     $new.append($('<span>').text(newTitle));
                     $new.append($(
-                        '<div class="nav-item-controls">\
-                            <button class="move-btn move-left" type="button" aria-label="左移"><i class="fas fa-arrow-left"></i></button>\
-                            <button class="move-btn move-right" type="button" aria-label="右移"><i class="fas fa-arrow-right"></i></button>\
-                        </div>'
+                        '<div class="nav-item-controls" style="display:none;"></div>'
                     ));
                     const $grid = $gridForAdd || $('.nav-grid').filter(function(){
                         return $(this).prev('h2').text() === newCategory;

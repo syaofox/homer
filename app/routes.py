@@ -113,6 +113,40 @@ def config():
 
             flash("项目已删除", "success")
 
+        elif action == "reorder":
+            category_name = request.form.get("category")
+            order = request.form.getlist("order[]") or request.form.get("order")
+            # 支持逗号分隔字符串或多值数组
+            if isinstance(order, str):
+                order_list = [t for t in order.split(',') if t]
+            elif isinstance(order, list):
+                order_list = order
+            else:
+                order_list = []
+
+            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
+                config = json.load(f)
+                for category in config["categories"]:
+                    if category["name"] == category_name:
+                        items_map = {item["title"]: item for item in category["items"]}
+                        new_items = []
+                        for title in order_list:
+                            if title in items_map:
+                                new_items.append(items_map.pop(title))
+                        # 追加任何未出现在 order_list 中的剩余项，保持相对顺序
+                        if items_map:
+                            for item in category["items"]:
+                                if item["title"] in items_map:
+                                    new_items.append(items_map[item["title"]])
+                        category["items"] = new_items
+                        break
+
+                f.seek(0)
+                json.dump(config, f, ensure_ascii=False, indent=2)
+                f.truncate()
+
+            flash("项目顺序已更新", "success")
+
         elif action in ["move_up", "move_down"]:
             category_name = request.form.get("category")
             item_title = request.form.get("title")
