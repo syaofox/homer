@@ -5,5 +5,5 @@ def create_app():
     return app
 
 if __name__ == "__main__":
-    print("Starting the application...listen on 0.0.0.0:5050")
-    app.run(host="0.0.0.0", port=5050, debug=False)
+    print("Starting the application...listen on 0.0.0.0:80")
+    app.run(host="0.0.0.0", port=80, debug=False)
