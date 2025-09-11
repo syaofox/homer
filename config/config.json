@@ -50,14 +50,14 @@
           "url": "https://member.bilibili.com/platform/home?spm_id_from=333.1007.0.0"
         },
         {
-          "title": "抖音创作者中心",
-          "icon": "img/douyin.ico",
-          "url": "https://creator.douyin.com/creator-micro/home"
-        },
-        {
           "title": "百家号",
           "icon": "img/baijiahao.png",
           "url": "https://baijiahao.baidu.com/"
+        },
+        {
+          "title": "抖音创作者中心",
+          "icon": "img/douyin.ico",
+          "url": "https://creator.douyin.com/creator-micro/home"
         },
         {
           "title": "股市假期",
