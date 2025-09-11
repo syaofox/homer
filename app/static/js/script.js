@@ -247,8 +247,8 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
                     $new.append($('<span>').text(newTitle));
                     $new.append($(
                         '<div class="nav-item-controls">\
-                            <button class="move-btn move-left" type="button" title="左移" aria-label="左移"><i class="fas fa-arrow-left"></i></button>\
-                            <button class="move-btn move-right" type="button" title="右移" aria-label="右移"><i class="fas fa-arrow-right"></i></button>\
+                            <button class="move-btn move-left" type="button" aria-label="左移"><i class="fas fa-arrow-left"></i></button>\
+                            <button class="move-btn move-right" type="button" aria-label="右移"><i class="fas fa-arrow-right"></i></button>\
                         </div>'
                     ));
                     const $grid = $gridForAdd || $('.nav-grid').filter(function(){
