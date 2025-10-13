@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: syaofox/homer:2.3
+    image: syaofox/homer:2.4
     ports:
       - "8080:80"
     restart: unless-stopped
