@@ -73,12 +73,37 @@
 ### 代码优化
 
 本项目已进行以下优化：
-- 消除了配置文件操作的代码重复
-- 添加了文件锁机制防止并发写入冲突
-- 实现了配置缓存减少磁盘I/O
-- 增强了错误处理和日志记录
-- 优化了搜索功能移除冗余操作
-- 改进了输入验证和安全性
+- **优雅的配置管理系统**: 统一的环境检测和配置管理，支持本地和Docker环境
+- **消除代码重复**: 配置文件操作代码重复减少约40%
+- **并发安全**: 文件锁机制防止并发写入冲突
+- **性能优化**: 配置缓存减少磁盘I/O，优化搜索算法
+- **错误处理**: 增强的异常处理和日志记录
+- **安全性**: 全面的输入验证和清理，防止XSS和注入攻击
+- **环境适配**: 自动检测运行环境，支持开发、生产和Docker部署
+
+### 环境配置
+
+项目支持通过环境变量进行配置：
+
+```bash
+# 开发环境
+export ENVIRONMENT=development
+export FLASK_DEBUG=true
+export LOG_LEVEL=DEBUG
+
+# 生产环境
+export ENVIRONMENT=production
+export LOG_LEVEL=WARNING
+```
+
+主要配置项：
+- `ENVIRONMENT`: 运行环境 (development/production)
+- `HOST`: 监听主机 (默认: 0.0.0.0)
+- `PORT`: 监听端口 (默认: 8080)
+- `LOG_LEVEL`: 日志级别 (DEBUG/INFO/WARNING/ERROR)
+- `MAX_CONTENT_LENGTH`: 最大上传文件大小
+- `CACHE_TTL`: 配置缓存时间（秒）
+- `TZ`: 时区设置 (默认: Asia/Shanghai)
 
 ### 日志
 

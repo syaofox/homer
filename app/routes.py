@@ -8,8 +8,9 @@ from werkzeug.utils import secure_filename
 
 from app import app
 from app.config_manager import config_manager
+from app.config import config as app_config
 from app.utils import (
-    validate_form_data, error_handler, get_config_img_path,
+    validate_form_data, error_handler,
     validate_title, validate_url, validate_category_name,
     sanitize_filename, format_error_message
 )
@@ -17,7 +18,7 @@ from app.utils import (
 # 设置日志
 logger = logging.getLogger(__name__)
 
-CONFIG_IMG_PATH = get_config_img_path()
+CONFIG_IMG_PATH = app_config.images_path
 
 @app.route("/")
 @error_handler

@@ -3,58 +3,31 @@
 提供文件锁、缓存和错误处理功能
 """
 import json
-import os
 import threading
 import time
 from pathlib import Path
 from typing import Dict, Any, Optional
 import logging
 
-logger = logging.getLogger(__name__)
+from .config import config as app_config
 
-def get_project_root() -> str:
-    """
-    获取项目根目录路径
-    
-    Returns:
-        str: 项目根目录的绝对路径
-    """
-    # 从当前文件位置向上查找项目根目录
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # 查找包含 pyproject.toml 或 main.py 的目录
-    while current_dir != os.path.dirname(current_dir):  # 未到达根目录
-        if os.path.exists(os.path.join(current_dir, 'pyproject.toml')) or \
-           os.path.exists(os.path.join(current_dir, 'main.py')):
-            return current_dir
-        current_dir = os.path.dirname(current_dir)
-    
-    # 如果没找到，返回当前目录
-    return os.path.dirname(os.path.abspath(__file__))
+logger = logging.getLogger(__name__)
 
 class ConfigManager:
     """配置文件管理器"""
     
-    def __init__(self, config_path: str = None):
-        """
-        初始化配置管理器
-        
-        Args:
-            config_path: 配置文件路径，如果为None则自动检测
-        """
-        if config_path is None:
-            project_root = get_project_root()
-            config_path = os.path.join(project_root, "config", "config.json")
-        
-        self.config_path = Path(config_path).resolve()
+    def __init__(self):
+        """初始化配置管理器"""
+        self.config_path = Path(app_config.config_path)
         self.config_dir = self.config_path.parent
         self._lock = threading.RLock()
         self._cache = None
         self._cache_time = 0
-        self._cache_ttl = 30  # 缓存30秒
+        self._cache_ttl = app_config.cache_ttl
         
-        # 确保配置目录存在
-        self.config_dir.mkdir(parents=True, exist_ok=True)
+        # 验证配置
+        if not app_config.validate_config():
+            raise RuntimeError("Configuration validation failed")
         
         logger.info(f"ConfigManager initialized with path: {self.config_path}")
     

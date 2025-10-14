@@ -20,6 +20,11 @@ FROM python:3.13.3-alpine
 
 WORKDIR /app
 
+# 安装时区数据包并设置默认时区为上海
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
 # 从构建阶段复制虚拟环境
 COPY --from=builder /.venv /.venv
 
@@ -33,6 +38,8 @@ EXPOSE 8080
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/.venv/bin:$PATH"
+ENV DOCKER_CONTAINER=true
+ENV TZ=Asia/Shanghai
 
 # 创建非root用户并设置适当权限
 RUN adduser -D appuser && \

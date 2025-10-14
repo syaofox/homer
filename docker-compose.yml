@@ -9,6 +9,14 @@ services:
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
+      - DOCKER_CONTAINER=true
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - HOST=0.0.0.0
+      - PORT=8080
+      - MAX_CONTENT_LENGTH=16777216
+      - CACHE_TTL=30
+      - TZ=Asia/Shanghai
     volumes:
       - ./config:/config 
 

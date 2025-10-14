@@ -228,35 +228,6 @@ def error_handler(f):
             return {'error': '服务器内部错误'}, 500
     return decorated_function
 
-def get_project_root() -> str:
-    """
-    获取项目根目录路径
-    
-    Returns:
-        str: 项目根目录的绝对路径
-    """
-    # 从当前文件位置向上查找项目根目录
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # 查找包含 pyproject.toml 或 main.py 的目录
-    while current_dir != os.path.dirname(current_dir):  # 未到达根目录
-        if os.path.exists(os.path.join(current_dir, 'pyproject.toml')) or \
-           os.path.exists(os.path.join(current_dir, 'main.py')):
-            return current_dir
-        current_dir = os.path.dirname(current_dir)
-    
-    # 如果没找到，返回当前目录
-    return os.path.dirname(os.path.abspath(__file__))
-
-def get_config_img_path() -> str:
-    """
-    获取配置图片目录的绝对路径
-    
-    Returns:
-        str: 配置图片目录的绝对路径
-    """
-    project_root = get_project_root()
-    return os.path.join(project_root, "config", "img")
 
 def clean_html_content(content: str) -> str:
     """
