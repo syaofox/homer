@@ -1,205 +1,237 @@
 import json
 import os
+import logging
 from pypinyin import lazy_pinyin
-import re
 
-from flask import flash, redirect, render_template, request, url_for, jsonify
+from flask import redirect, render_template, request, url_for, jsonify
 from werkzeug.utils import secure_filename
 
 from app import app
+from app.config_manager import config_manager
+from app.utils import (
+    validate_form_data, error_handler, get_config_img_path,
+    validate_title, validate_url, validate_category_name,
+    sanitize_filename, format_error_message
+)
 
-CONFIG_PATH = "config/config.json"
-CONFIG_IMG_PATH = "config/img"
+# 设置日志
+logger = logging.getLogger(__name__)
+
+CONFIG_IMG_PATH = get_config_img_path()
 
 @app.route("/")
+@error_handler
 def index():
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        config = json.load(f)
-    categories = [
-        {"name": category["name"], "nav_items": category["items"]}
-        for category in config["categories"]
-    ]
-    return render_template("index.html", categories=categories)
+    """主页 - 显示导航分类"""
+    try:
+        categories = config_manager.get_categories()
+        categories_data = [
+            {"name": category["name"], "nav_items": category["items"]}
+            for category in categories
+        ]
+        return render_template("index.html", categories=categories_data)
+    except Exception as e:
+        logger.error(f"加载主页失败: {e}")
+        return render_template("index.html", categories=[])
 
 
 @app.route("/config", methods=["GET", "POST"])
+@error_handler
 def config():
+    """配置管理页面"""
     if request.method == "POST":
-        action = request.form.get("action")
-        if action == "add":
-            category = request.form.get("category")
-            title = request.form.get("title")
-            url = request.form.get("url")
-            icon = request.files.get("icon")
+        return handle_config_post()
+    
+    try:
+        categories = config_manager.get_categories()
+        categories_data = [
+            {"name": category["name"], "nav_items": category["items"]}
+            for category in categories
+        ]
+        return render_template("config.html", categories=categories_data)
+    except Exception as e:
+        logger.error(f"加载配置页面失败: {e}")
+        return render_template("config.html", categories=[])
 
-            if icon and icon.filename:
-                filename = secure_filename(icon.filename)
-                icon.save(os.path.join(CONFIG_IMG_PATH, filename))
-                icon_path = f"img/{filename}"
-            else:
-                icon_path = "fas fa-link"  # 默认图标
+def handle_config_post():
+    """处理配置页面的POST请求"""
+    action = request.form.get("action")
+    
+    if action == "add":
+        return handle_add_item()
+    elif action == "edit":
+        return handle_edit_item()
+    elif action == "delete":
+        return handle_delete_item()
+    elif action == "reorder":
+        return handle_reorder_items()
+    elif action in ["move_up", "move_down"]:
+        return handle_move_item()
+    else:
+        return jsonify({"error": "未知操作"}), 400
 
-            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
-                config = json.load(f)
-                for cat in config["categories"]:
-                    if cat["name"] == category:
-                        cat["items"].append(
-                            {"title": title, "icon": icon_path, "url": url}
-                        )
-                        break
-                f.seek(0)
-                json.dump(config, f, ensure_ascii=False, indent=2)
-                f.truncate()
+def handle_add_item():
+    """处理添加项目"""
+    # 验证输入数据
+    validation = validate_form_data(request.form, ["category", "title", "url"])
+    if not validation["valid"]:
+        return jsonify({"error": format_error_message(validation["errors"])}), 400
+    
+    category = request.form.get("category")
+    title = request.form.get("title")
+    url = request.form.get("url")
+    icon = request.files.get("icon")
 
-            flash("项目已添加", "success")
+    # 处理图标
+    if icon and icon.filename:
+        filename = sanitize_filename(secure_filename(icon.filename))
+        if not filename:
+            return jsonify({"error": "无效的文件名"}), 400
+        
+        icon.save(os.path.join(CONFIG_IMG_PATH, filename))
+        icon_path = f"img/{filename}"
+    else:
+        icon_path = "fas fa-link"
 
-        elif action == "edit":
-            old_category = request.form.get("old_category")
-            new_category = request.form.get("new_category")
-            old_title = request.form.get("old_title")
-            new_title = request.form.get("new_title")
-            new_url = request.form.get("new_url")
-            new_icon = request.files.get("new_icon")
+    # 添加项目
+    new_item = {"title": title, "icon": icon_path, "url": url}
+    config_manager.add_item_to_category(category, new_item)
+    
+    return jsonify({"success": True, "message": "项目已添加"})
 
-            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
-                config = json.load(f)
-                item_to_move = None
-                for category in config["categories"]:
-                    if category["name"] == old_category:
-                        for item in category["items"]:
-                            if item["title"] == old_title:
-                                item["title"] = new_title
-                                item["url"] = new_url
-                                if new_icon and new_icon.filename:
-                                    filename = secure_filename(new_icon.filename)
-                                    new_icon.save(
-                                        os.path.join(CONFIG_IMG_PATH, filename)
-                                    )
-                                    item["icon"] = f"img/{filename}"
-                                if old_category != new_category:
-                                    item_to_move = item
-                                    category["items"].remove(item)
-                                break
-                        break
+def handle_edit_item():
+    """处理编辑项目"""
+    # 验证输入数据
+    validation = validate_form_data(request.form, ["old_category", "old_title", "new_category", "new_title", "new_url"])
+    if not validation["valid"]:
+        return jsonify({"error": format_error_message(validation["errors"])}), 400
+    
+    old_category = request.form.get("old_category")
+    new_category = request.form.get("new_category")
+    old_title = request.form.get("old_title")
+    new_title = request.form.get("new_title")
+    new_url = request.form.get("new_url")
+    new_icon = request.files.get("new_icon")
 
-                if item_to_move:
-                    for category in config["categories"]:
-                        if category["name"] == new_category:
-                            category["items"].append(item_to_move)
-                            break
+    # 处理新图标
+    icon_path = None
+    if new_icon and new_icon.filename:
+        filename = sanitize_filename(secure_filename(new_icon.filename))
+        if filename:
+            new_icon.save(os.path.join(CONFIG_IMG_PATH, filename))
+            icon_path = f"img/{filename}"
 
-                f.seek(0)
-                json.dump(config, f, ensure_ascii=False, indent=2)
-                f.truncate()
+    # 获取原项目信息
+    original_item = config_manager.find_item_in_category(old_category, old_title)
+    if not original_item:
+        return jsonify({"error": "项目未找到"}), 404
 
-            flash("项目已更新", "success")
+    # 创建更新后的项目
+    updated_item = {
+        "title": new_title,
+        "url": new_url,
+        "icon": icon_path if icon_path else original_item["icon"]
+    }
 
-        elif action == "delete":
-            category_name = request.form.get("category")
-            title = request.form.get("title")
+    if old_category == new_category:
+        # 同一分类内更新
+        config_manager.update_item_in_category(old_category, old_title, updated_item)
+    else:
+        # 跨分类更新 - 先删除再添加
+        config_manager.remove_item_from_category(old_category, old_title)
+        config_manager.add_item_to_category(new_category, updated_item)
+    
+    return jsonify({"success": True, "message": "项目已更新"})
 
-            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
-                config = json.load(f)
-                for category in config["categories"]:
-                    if category["name"] == category_name:
-                        category["items"] = [
-                            item for item in category["items"] if item["title"] != title
-                        ]
-                        break
+def handle_delete_item():
+    """处理删除项目"""
+    validation = validate_form_data(request.form, ["category", "title"])
+    if not validation["valid"]:
+        return jsonify({"error": format_error_message(validation["errors"])}), 400
+    
+    category_name = request.form.get("category")
+    title = request.form.get("title")
 
-                f.seek(0)
-                json.dump(config, f, ensure_ascii=False, indent=2)
-                f.truncate()
+    # 检查项目是否存在
+    if not config_manager.find_item_in_category(category_name, title):
+        return jsonify({"error": "项目未找到"}), 404
 
-            flash("项目已删除", "success")
+    config_manager.remove_item_from_category(category_name, title)
+    return jsonify({"success": True, "message": "项目已删除"})
 
-        elif action == "reorder":
-            category_name = request.form.get("category")
-            order = request.form.getlist("order[]") or request.form.get("order")
-            # 支持逗号分隔字符串或多值数组
-            if isinstance(order, str):
-                order_list = [t for t in order.split(',') if t]
-            elif isinstance(order, list):
-                order_list = order
-            else:
-                order_list = []
+def handle_reorder_items():
+    """处理重新排序项目"""
+    category_name = request.form.get("category")
+    if not category_name:
+        return jsonify({"error": "分类名称是必需的"}), 400
+    
+    order = request.form.getlist("order[]") or request.form.get("order")
+    
+    # 支持逗号分隔字符串或多值数组
+    if isinstance(order, str):
+        order_list = [t.strip() for t in order.split(',') if t.strip()]
+    elif isinstance(order, list):
+        order_list = [t.strip() for t in order if t.strip()]
+    else:
+        order_list = []
 
-            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
-                config = json.load(f)
-                for category in config["categories"]:
-                    if category["name"] == category_name:
-                        items_map = {item["title"]: item for item in category["items"]}
-                        new_items = []
-                        for title in order_list:
-                            if title in items_map:
-                                new_items.append(items_map.pop(title))
-                        # 追加任何未出现在 order_list 中的剩余项，保持相对顺序
-                        if items_map:
-                            for item in category["items"]:
-                                if item["title"] in items_map:
-                                    new_items.append(items_map[item["title"]])
-                        category["items"] = new_items
-                        break
+    if not order_list:
+        return jsonify({"error": "排序列表不能为空"}), 400
 
-                f.seek(0)
-                json.dump(config, f, ensure_ascii=False, indent=2)
-                f.truncate()
+    config_manager.reorder_items_in_category(category_name, order_list)
+    return jsonify({"success": True, "message": "项目顺序已更新"})
 
-            flash("项目顺序已更新", "success")
+def handle_move_item():
+    """处理移动项目"""
+    validation = validate_form_data(request.form, ["category", "title"])
+    if not validation["valid"]:
+        return jsonify({"error": format_error_message(validation["errors"])}), 400
+    
+    category_name = request.form.get("category")
+    item_title = request.form.get("title")
+    action = request.form.get("action")
 
-        elif action in ["move_up", "move_down"]:
-            category_name = request.form.get("category")
-            item_title = request.form.get("title")
+    # 检查项目是否存在
+    if not config_manager.find_item_in_category(category_name, item_title):
+        return jsonify({"error": "项目未找到"}), 404
 
-            with open(CONFIG_PATH, "r+", encoding="utf-8") as f:
-                config = json.load(f)
-                for category in config["categories"]:
-                    if category["name"] == category_name:
-                        items = category["items"]
-                        for i, item in enumerate(items):
-                            if item["title"] == item_title:
-                                if action == "move_up" and i > 0:
-                                    items[i], items[i - 1] = items[i - 1], items[i]
-                                elif action == "move_down" and i < len(items) - 1:
-                                    items[i], items[i + 1] = items[i + 1], items[i]
-                                break
-                        break
-
-                f.seek(0)
-                json.dump(config, f, ensure_ascii=False, indent=2)
-                f.truncate()
-
-            flash("项目顺序已更新", "success")
-
-        return redirect(url_for("config"))
-
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        config = json.load(f)
-    categories = [
-        {"name": category["name"], "nav_items": category["items"]}
-        for category in config["categories"]
-    ]
-    return render_template("config.html", categories=categories)
+    direction = "up" if action == "move_up" else "down"
+    config_manager.move_item_in_category(category_name, item_title, direction)
+    
+    return jsonify({"success": True, "message": "项目顺序已更新"})
 
 
 @app.route('/search')
+@error_handler
 def search():
-    search_term = request.args.get('term', '').lower()
+    """搜索功能 - 支持中文、拼音和URL搜索"""
+    search_term = request.args.get('term', '').strip()
     
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        config = json.load(f)
+    if not search_term:
+        return jsonify([])
     
-    results = []
-    for category in config['categories']:
-        for item in category['items']:
-            title = item['title']
-            url = item['url']
-            title_pinyin = ''.join(lazy_pinyin(title))
-            
-            if (search_term in title.lower() or 
-                search_term in url.lower() or 
-                search_term in title_pinyin.lower() or
-                re.search(search_term, title_pinyin.lower())):
-                results.append(item)
+    search_term_lower = search_term.lower()
     
-    return jsonify(results)
+    try:
+        categories = config_manager.get_categories()
+        results = []
+        
+        for category in categories:
+            for item in category.get('items', []):
+                title = item.get('title', '')
+                url = item.get('url', '')
+                
+                # 生成拼音
+                title_pinyin = ''.join(lazy_pinyin(title)).lower()
+                
+                # 搜索匹配逻辑（移除冗余的正则匹配）
+                if (search_term_lower in title.lower() or 
+                    search_term_lower in url.lower() or 
+                    search_term_lower in title_pinyin):
+                    results.append(item)
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        logger.error(f"搜索失败: {e}")
+        return jsonify([])

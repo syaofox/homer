@@ -18,7 +18,7 @@ RUN uv venv /.venv && \
 # 第二阶段：运行阶段
 FROM python:3.13.3-alpine
 
-WORKDIR /
+WORKDIR /app
 
 # 从构建阶段复制虚拟环境
 COPY --from=builder /.venv /.venv
@@ -27,8 +27,8 @@ COPY --from=builder /.venv /.venv
 COPY app/ ./app/
 COPY main.py .
 
-# 暴露端口
-EXPOSE 80
+# 暴露端口（使用高端口避免权限问题）
+EXPOSE 8080
 
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1
@@ -40,5 +40,5 @@ RUN adduser -D appuser && \
     chown -R appuser:appuser /.venv
 USER appuser
 
-# 运行命令
-CMD ["waitress-serve", "--host=0.0.0.0", "--port=80", "--call", "main:create_app"]
+# 运行命令（使用8080端口）
+CMD ["waitress-serve", "--host=0.0.0.0", "--port=8080", "--call", "main:create_app"]

@@ -2,7 +2,7 @@ from flask import Flask, send_from_directory
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'  # 用于 flash 消息
+# 移除无用的SECRET_KEY，因为flash消息在前端AJAX场景下不起作用
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 限制上传文件大小为 16MB
 
 # 添加从config/img提供静态文件的路由
