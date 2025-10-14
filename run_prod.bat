@@ -1,1 +1,0 @@
-uv run waitress-serve --host=0.0.0.0 --port=80 --call "main:create_app" 

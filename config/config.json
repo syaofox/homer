@@ -5,14 +5,14 @@
       "icon": "fa fa-server",
       "items": [
         {
-          "title": "抖音违禁词",
-          "icon": "img/favicon_2.ico",
-          "url": "https://www.doucici.com/"
-        },
-        {
           "title": "股市假期",
           "icon": "img/tdx.ico",
           "url": "https://www.tdx.com.cn/url/holiday/"
+        },
+        {
+          "title": "抖音违禁词",
+          "icon": "img/favicon_2.ico",
+          "url": "https://www.doucici.com/"
         }
       ]
     },
@@ -24,11 +24,6 @@
           "title": "豆包",
           "icon": "img/doubao.png",
           "url": "https://doubao.com/"
-        },
-        {
-          "title": "通义千问",
-          "icon": "img/tongyi.png",
-          "url": "https://tongyi.aliyun.com/"
         }
       ]
     }

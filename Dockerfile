@@ -7,11 +7,11 @@ WORKDIR /app
 RUN pip install --no-cache-dir uv
 
 # 复制依赖文件
-COPY requirements.txt .
+COPY pyproject.toml .
 
 # 使用 uv 创建虚拟环境并安装依赖，同时清理缓存
 RUN uv venv /.venv && \
-    uv pip install --python /.venv/bin/python --no-cache -r requirements.txt && \
+    uv pip install --python /.venv/bin/python --no-cache . && \
     find /.venv -type f -name "*.pyc" -delete && \
     find /.venv -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
