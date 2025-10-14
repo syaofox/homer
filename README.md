@@ -54,27 +54,14 @@ docker-compose up -d
 
 #### 安装和运行
 
-1. 创建虚拟环境：
+1. 创建虚拟环境并安装依赖：
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   # 或
-   venv\Scripts\activate     # Windows
+   uv sync
    ```
 
-2. 安装依赖：
+2. 运行应用：
    ```bash
-   pip install -r requirements.txt
-   ```
-   
-   或使用 uv（推荐）：
-   ```bash
-   uv pip install -e .
-   ```
-
-3. 运行应用：
-   ```bash
-   python main.py
+   uv run python main.py
    ```
 
 ## 访问应用
@@ -85,12 +72,6 @@ docker-compose up -d
 - 配置页：http://localhost:8080/config
 
 ## 配置说明
-
-### 基本配置
-
-- **端口**：默认运行在 8080 端口
-- **配置目录**：`./config`（Docker）或项目根目录的 `config` 文件夹
-- **数据目录**：配置文件和图标保存在配置目录中
 
 ### 环境变量（可选）
 
