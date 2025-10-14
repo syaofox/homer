@@ -3,20 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: syaofox/homer:2.4
+    image: syaofox/homer:2.5
     ports:
       - "8080:80"
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - ./config:/app/config 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/", "||", "exit", "1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      - ./config:/config 
 
 # 定义volumes
 volumes:
