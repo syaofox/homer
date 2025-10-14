@@ -2,7 +2,52 @@
 
 ## 生产环境部署指南
 
-### 方法一：使用批处理脚本运行
+### 方法一：使用 GitHub Actions 构建 Docker 镜像
+
+本项目已配置 GitHub Actions 工作流，可以自动构建 Docker 镜像并推送到 GitHub Container Registry。
+
+#### 手动触发构建
+
+1. 访问 GitHub 仓库的 Actions 页面
+2. 选择 "Build and Push Docker Image" 工作流
+3. 点击 "Run workflow" 按钮
+4. 输入版本标签（如：v2.5, v2.6）
+5. 点击 "Run workflow" 开始构建
+
+#### 使用构建的镜像
+
+构建完成后，可以通过以下命令拉取和使用镜像：
+
+```bash
+# 拉取最新版本
+docker pull ghcr.io/syaofox/homer:latest
+
+# 拉取指定版本
+docker pull ghcr.io/syaofox/homer:v2.5
+
+# 运行容器
+docker run -d \
+  --name homer \
+  -p 8080:8080 \
+  -v ./config:/config \
+  ghcr.io/syaofox/homer:latest
+```
+
+#### 更新 docker-compose.yml
+
+可以修改 `docker-compose.yml` 使用 GitHub Container Registry 的镜像：
+
+```yaml
+services:
+  web:
+    image: ghcr.io/syaofox/homer:latest
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    # ... 其他配置保持不变
+```
+
+### 方法二：使用批处理脚本运行
 
 1. 确保已安装Python 3.13+并创建了虚拟环境
 2. 安装依赖：
