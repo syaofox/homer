@@ -1,6 +1,127 @@
 console.log('个人导航页面已加载');
 
+// 访问统计相关功能
+let visitStats = {};
+
+// 初始化访问统计数据
+function initVisitStats() {
+    try {
+        const stored = localStorage.getItem('visitStats');
+        if (stored) {
+            visitStats = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.warn('无法读取访问统计数据:', e);
+        visitStats = {};
+    }
+}
+
+// 记录访问
+function recordVisit(title, icon, url) {
+    if (!url) return;
+    
+    if (!visitStats[url]) {
+        visitStats[url] = {
+            title: title,
+            icon: icon,
+            url: url,
+            count: 0,
+            lastVisit: Date.now()
+        };
+    }
+    
+    visitStats[url].count++;
+    visitStats[url].lastVisit = Date.now();
+    
+    // 保存到localStorage
+    try {
+        localStorage.setItem('visitStats', JSON.stringify(visitStats));
+    } catch (e) {
+        console.warn('无法保存访问统计数据:', e);
+    }
+}
+
+// 获取访问频率最高的站点
+function getTopVisitedSites(limit = 20) {
+    const sites = Object.values(visitStats);
+    return sites
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+}
+
+// 渲染常用分类
+function renderFrequentCategory() {
+    const topSites = getTopVisitedSites();
+    if (topSites.length === 0) return;
+    
+    const $frequentCategory = $('#frequent-category');
+    $frequentCategory.empty();
+    
+    // 创建分类标题
+    const $title = $('<h2>').text('常用');
+    $frequentCategory.append($title);
+    
+    // 创建网格容器
+    const $grid = $('<div>').addClass('nav-grid');
+    
+    // 添加站点
+    topSites.forEach(function(site) {
+        const $item = $('<a>')
+            .attr('href', site.url)
+            .addClass('nav-item')
+            .attr('data-category', '常用')
+            .attr('data-title', site.title);
+        
+        // 添加图标
+        if (site.icon.startsWith('fas ') || site.icon.startsWith('fab ')) {
+            $item.append($('<i>').addClass(site.icon));
+        } else {
+            $item.append($('<img>')
+                .attr('src', '/config/' + site.icon)
+                .attr('alt', site.title)
+                .addClass('icon-img'));
+        }
+        
+        $item.append($('<span>').text(site.title));
+        $grid.append($item);
+    });
+    
+    $frequentCategory.append($grid);
+    $frequentCategory.show();
+}
+
+// 为所有导航链接添加点击统计
+function attachVisitTracking() {
+    $(document).on('click', '.nav-item:not(.add-item)', function(e) {
+        const $this = $(this);
+        const title = $this.data('title') || $this.find('span').text();
+        const url = $this.attr('href');
+        
+        // 获取图标信息
+        let icon = 'fas fa-link'; // 默认图标
+        const $icon = $this.find('i');
+        const $img = $this.find('img');
+        
+        if ($icon.length) {
+            icon = $icon.attr('class');
+        } else if ($img.length) {
+            icon = $img.attr('src').replace('/config/', '');
+        }
+        
+        recordVisit(title, icon, url);
+    });
+}
+
 $(document).ready(function() {
+    // 初始化访问统计
+    initVisitStats();
+    
+    // 渲染常用分类
+    renderFrequentCategory();
+    
+    // 添加访问跟踪
+    attachVisitTracking();
+    
     $('#search-input').on('input', function() {
         var searchTerm = $(this).val().toLowerCase();
         
@@ -113,7 +234,9 @@ function displaySearchResults(results) {
             var $item = $('<a>')
                 .attr('href', item.url)
                 // .attr('target', '_blank')
-                .addClass('nav-item');
+                .addClass('nav-item')
+                .attr('data-category', '搜索结果')
+                .attr('data-title', item.title);
 
             if (item.icon.startsWith('fas ') || item.icon.startsWith('fab ')) {
                 $item.append($('<i>').addClass(item.icon));
@@ -130,9 +253,11 @@ function displaySearchResults(results) {
 
         $('#search-results').show();
         $('#original-content').hide();
+        $('#frequent-category').hide();
     } else {
         $('#search-results').hide();
         $('#original-content').show();
+        $('#frequent-category').show();
     }
 }
 
