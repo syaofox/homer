@@ -82,6 +82,14 @@ function renderFrequentCategory() {
                 .addClass('icon-img'));
         }
         
+        // 添加点击次数徽章
+        if (site.count > 0) {
+            const $badge = $('<div>')
+                .addClass('click-badge')
+                .text(site.count);
+            $item.append($badge);
+        }
+        
         $item.append($('<span>').text(site.title));
         $grid.append($item);
     });
