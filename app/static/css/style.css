@@ -248,14 +248,51 @@ form input, form select, form button {
 
 .search-container {
     margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 #search-input {
-    width: 100%;
+    flex: 1;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ddd;
     border-radius: 5px;
+}
+
+.controls-container {
+    display: flex;
+    gap: 8px;
+}
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.toggle-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.toggle-btn i {
+    font-size: 12px;
 }
 
 #search-results {
@@ -267,7 +304,7 @@ form input, form select, form button {
     position: absolute;
     top: -2px;
     right: -2px;
-    background-color: #ff4444;
+    background-color: #007bff;
     color: white;
     border-radius: 50%;
     width: 18px;
@@ -281,4 +318,9 @@ form input, form select, form button {
     z-index: 10;
     min-width: 18px;
     padding: 0 2px;
+}
+
+/* 角标隐藏状态 */
+.badges-hidden .click-badge {
+    display: none !important;
 }

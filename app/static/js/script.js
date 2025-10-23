@@ -2,6 +2,7 @@ console.log('个人导航页面已加载');
 
 // 访问统计相关功能
 let visitStats = {};
+let badgesVisible = true; // 角标显示状态
 
 // 初始化访问统计数据
 function initVisitStats() {
@@ -13,6 +14,61 @@ function initVisitStats() {
     } catch (e) {
         console.warn('无法读取访问统计数据:', e);
         visitStats = {};
+    }
+}
+
+// 初始化角标显示状态
+function initBadgesVisibility() {
+    try {
+        const stored = localStorage.getItem('badgesVisible');
+        if (stored !== null) {
+            badgesVisible = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.warn('无法读取角标显示状态:', e);
+        badgesVisible = true;
+    }
+    updateBadgesVisibility();
+    updateToggleButton();
+}
+
+// 切换角标显示状态
+function toggleBadgesVisibility() {
+    badgesVisible = !badgesVisible;
+    updateBadgesVisibility();
+    updateToggleButton();
+    
+    // 保存状态到localStorage
+    try {
+        localStorage.setItem('badgesVisible', JSON.stringify(badgesVisible));
+    } catch (e) {
+        console.warn('无法保存角标显示状态:', e);
+    }
+}
+
+// 更新角标显示状态
+function updateBadgesVisibility() {
+    if (badgesVisible) {
+        $('body').removeClass('badges-hidden');
+    } else {
+        $('body').addClass('badges-hidden');
+    }
+}
+
+// 更新切换按钮状态
+function updateToggleButton() {
+    const $btn = $('#toggle-badges');
+    const $icon = $btn.find('i');
+    const $text = $btn.find('span');
+    
+    if (badgesVisible) {
+        $btn.addClass('active');
+        $icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        // $text.text('隐藏次数');
+    } else {
+        $btn.removeClass('active');
+        $icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        // $text.text('显示次数');
     }
 }
 
@@ -124,11 +180,20 @@ $(document).ready(function() {
     // 初始化访问统计
     initVisitStats();
     
+    // 初始化角标显示状态
+    initBadgesVisibility();
+    
     // 渲染常用分类
     renderFrequentCategory();
     
     // 添加访问跟踪
     attachVisitTracking();
+    
+    // 角标显示切换按钮事件
+    $('#toggle-badges').on('click', function(e) {
+        e.preventDefault();
+        toggleBadgesVisibility();
+    });
     
     $('#search-input').on('input', function() {
         var searchTerm = $(this).val().toLowerCase();
