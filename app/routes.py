@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 
 from app import app
 from app.config_manager import config_manager
+from app.visit_stats_manager import visit_stats_manager
 from app.config import config as app_config
 from app.utils import (
     validate_form_data, error_handler,
@@ -236,3 +237,45 @@ def search():
     except Exception as e:
         logger.error(f"搜索失败: {e}")
         return jsonify([])
+
+
+@app.route('/api/visit-stats', methods=['GET'])
+@error_handler
+def get_visit_stats():
+    """获取访问统计数据"""
+    try:
+        stats = visit_stats_manager.get_visit_stats()
+        return jsonify(stats)
+    except Exception as e:
+        logger.error(f"获取访问统计失败: {e}")
+        return jsonify({}), 500
+
+
+@app.route('/api/visit-stats/record', methods=['POST'])
+@error_handler
+def record_visit():
+    """记录一次访问"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "无效的请求数据"}), 400
+        
+        url = data.get('url', '').strip()
+        title = data.get('title', '').strip()
+        icon = data.get('icon', 'fas fa-link')
+        
+        if not url or not title:
+            return jsonify({"error": "url和title是必需的"}), 400
+        
+        # 记录访问
+        updated_stat = visit_stats_manager.record_visit(url, title, icon)
+        
+        return jsonify({
+            "success": True,
+            "data": updated_stat
+        })
+        
+    except Exception as e:
+        logger.error(f"记录访问失败: {e}")
+        return jsonify({"error": "记录访问失败"}), 500

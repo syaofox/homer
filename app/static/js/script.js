@@ -4,17 +4,20 @@ console.log('个人导航页面已加载');
 let visitStats = {};
 let badgesVisible = true; // 角标显示状态
 
-// 初始化访问统计数据
+// 初始化访问统计数据 - 从服务器获取
 function initVisitStats() {
-    try {
-        const stored = localStorage.getItem('visitStats');
-        if (stored) {
-            visitStats = JSON.parse(stored);
+    $.ajax({
+        url: '/api/visit-stats',
+        method: 'GET',
+        success: function(data) {
+            visitStats = data;
+            renderFrequentCategory();
+        },
+        error: function(xhr, status, error) {
+            console.warn('无法读取访问统计数据:', error);
+            visitStats = {};
         }
-    } catch (e) {
-        console.warn('无法读取访问统计数据:', e);
-        visitStats = {};
-    }
+    });
 }
 
 // 初始化角标显示状态
@@ -72,29 +75,30 @@ function updateToggleButton() {
     }
 }
 
-// 记录访问
+// 记录访问 - 发送到服务器
 function recordVisit(title, icon, url) {
     if (!url) return;
     
-    if (!visitStats[url]) {
-        visitStats[url] = {
-            title: title,
-            icon: icon,
+    // 发送到服务器
+    $.ajax({
+        url: '/api/visit-stats/record',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
             url: url,
-            count: 0,
-            lastVisit: Date.now()
-        };
-    }
-    
-    visitStats[url].count++;
-    visitStats[url].lastVisit = Date.now();
-    
-    // 保存到localStorage
-    try {
-        localStorage.setItem('visitStats', JSON.stringify(visitStats));
-    } catch (e) {
-        console.warn('无法保存访问统计数据:', e);
-    }
+            title: title,
+            icon: icon
+        }),
+        success: function(response) {
+            if (response.success && response.data) {
+                // 更新本地缓存
+                visitStats[url] = response.data;
+            }
+        },
+        error: function(xhr, status, error) {
+            console.warn('无法保存访问统计数据:', error);
+        }
+    });
 }
 
 // 获取访问频率最高的站点
@@ -177,14 +181,11 @@ function attachVisitTracking() {
 }
 
 $(document).ready(function() {
-    // 初始化访问统计
+    // 初始化访问统计（会在成功后自动渲染常用分类）
     initVisitStats();
     
     // 初始化角标显示状态
     initBadgesVisibility();
-    
-    // 渲染常用分类
-    renderFrequentCategory();
     
     // 添加访问跟踪
     attachVisitTracking();
