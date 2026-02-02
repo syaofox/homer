@@ -21,9 +21,9 @@
       "icon": "fas fa-robot",
       "items": [
         {
-          "title": "豆包",
-          "icon": "img/doubao.png",
-          "url": "https://doubao.com/"
+          "title": "豆包1",
+          "url": "https://doubao.com/1",
+          "icon": "img/doubao.png"
         }
       ]
     }

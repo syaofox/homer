@@ -221,6 +221,13 @@ $(document).ready(function() {
     $(document).on('contextmenu', '.nav-item:not(.add-item)', function(e) {
         e.preventDefault();
         contextTarget = this;
+        const category = $(this).data('category');
+        // 常用项目区只显示删除，不显示编辑
+        if (category === '常用') {
+            $contextMenu.find('li[data-action="edit"]').hide();
+        } else {
+            $contextMenu.find('li[data-action="edit"]').show();
+        }
         $contextMenu.css({ top: e.pageY + 'px', left: e.pageX + 'px' }).show();
     });
 
@@ -228,7 +235,7 @@ $(document).ready(function() {
     $(document).on('click', function() { $contextMenu.hide(); });
     $(document).on('keydown', function(e) { if (e.key === 'Escape') { $contextMenu.hide(); } });
 
-    // 处理右键菜单：改为原地编辑/删除
+    // 处理右键菜单：常用区仅删除，其它分类可编辑/删除
     $contextMenu.on('click', 'li', function(e) {
         e.stopPropagation();
         const action = $(this).data('action');
@@ -237,6 +244,8 @@ $(document).ready(function() {
         const category = $target.data('category');
         const title = $target.data('title');
         if (action === 'edit') {
+            // 常用区不提供编辑，仅非常用项可编辑
+            if (category === '常用') return;
             openEditModal({
                 mode: 'edit',
                 category: category,

@@ -116,24 +116,9 @@ def handle_edit_item():
     new_icon = request.files.get("new_icon")
     old_url = request.form.get("old_url", "").strip()
 
-    # 常用分组：编辑写入 visit_stats.json
+    # 常用分组不支持编辑，仅支持删除
     if old_category == "常用":
-        if not old_url:
-            return jsonify({"error": "常用项目编辑需要提供 old_url"}), 400
-        icon_path = "fas fa-link"
-        if new_icon and new_icon.filename:
-            filename = sanitize_filename(secure_filename(new_icon.filename))
-            if filename:
-                new_icon.save(os.path.join(CONFIG_IMG_PATH, filename))
-                icon_path = f"img/{filename}"
-        else:
-            stats = visit_stats_manager.load_stats()
-            if old_url in stats:
-                icon_path = stats[old_url].get("icon", "fas fa-link")
-        updated = visit_stats_manager.update_stat(old_url, new_url, new_title, icon_path)
-        if not updated:
-            return jsonify({"error": "项目未找到"}), 404
-        return jsonify({"success": True, "message": "项目已更新"})
+        return jsonify({"error": "常用项目不支持编辑，仅支持删除"}), 400
 
     # 处理新图标（非常用）
     icon_path = None
