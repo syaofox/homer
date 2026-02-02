@@ -107,15 +107,35 @@ def handle_edit_item():
     validation = validate_form_data(request.form, ["old_category", "old_title", "new_category", "new_title", "new_url"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
-    
+
     old_category = request.form.get("old_category")
     new_category = request.form.get("new_category")
     old_title = request.form.get("old_title")
     new_title = request.form.get("new_title")
-    new_url = request.form.get("new_url")
+    new_url = request.form.get("new_url").strip()
     new_icon = request.files.get("new_icon")
+    old_url = request.form.get("old_url", "").strip()
 
-    # 处理新图标
+    # 常用分组：编辑写入 visit_stats.json
+    if old_category == "常用":
+        if not old_url:
+            return jsonify({"error": "常用项目编辑需要提供 old_url"}), 400
+        icon_path = "fas fa-link"
+        if new_icon and new_icon.filename:
+            filename = sanitize_filename(secure_filename(new_icon.filename))
+            if filename:
+                new_icon.save(os.path.join(CONFIG_IMG_PATH, filename))
+                icon_path = f"img/{filename}"
+        else:
+            stats = visit_stats_manager.load_stats()
+            if old_url in stats:
+                icon_path = stats[old_url].get("icon", "fas fa-link")
+        updated = visit_stats_manager.update_stat(old_url, new_url, new_title, icon_path)
+        if not updated:
+            return jsonify({"error": "项目未找到"}), 404
+        return jsonify({"success": True, "message": "项目已更新"})
+
+    # 处理新图标（非常用）
     icon_path = None
     if new_icon and new_icon.filename:
         filename = sanitize_filename(secure_filename(new_icon.filename))
@@ -142,16 +162,30 @@ def handle_edit_item():
         # 跨分类更新 - 先删除再添加
         config_manager.remove_item_from_category(old_category, old_title)
         config_manager.add_item_to_category(new_category, updated_item)
-    
+
     return jsonify({"success": True, "message": "项目已更新"})
 
 def handle_delete_item():
     """处理删除项目"""
+    category_name = request.form.get("category")
+    if not category_name:
+        return jsonify({"error": "分类名称是必需的"}), 400
+
+    # 常用分组：删除写入 visit_stats.json
+    if category_name == "常用":
+        url = request.form.get("url", "").strip()
+        if not url:
+            return jsonify({"error": "常用项目删除需要提供 url"}), 400
+        stats = visit_stats_manager.load_stats()
+        if url not in stats:
+            return jsonify({"error": "项目未找到"}), 404
+        visit_stats_manager.remove_stat(url)
+        return jsonify({"success": True, "message": "项目已删除"})
+
     validation = validate_form_data(request.form, ["category", "title"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
-    
-    category_name = request.form.get("category")
+
     title = request.form.get("title")
 
     # 检查项目是否存在

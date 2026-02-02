@@ -149,21 +149,73 @@ class VisitStatsManager:
     def get_top_visited(self, limit: int = 20) -> List[Dict[str, Any]]:
         """
         获取访问频率最高的站点
-        
+
         Args:
             limit: 返回的站点数量限制
-            
+
         Returns:
             按访问次数排序的站点列表
         """
         stats = self.load_stats()
         sites = list(stats.values())
-        
+
         # 按访问次数降序排序
         sites.sort(key=lambda x: x.get('count', 0), reverse=True)
-        
+
         return sites[:limit]
-    
+
+    def remove_stat(self, url: str) -> None:
+        """
+        按 URL 删除一条访问统计
+
+        Args:
+            url: 要删除的站点 URL
+        """
+        with self._lock:
+            stats = self.load_stats(use_cache=False)
+            if url in stats:
+                del stats[url]
+                self._save_stats_internal(stats)
+
+    def update_stat(
+        self,
+        old_url: str,
+        new_url: str,
+        title: str,
+        icon: str,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        更新一条访问统计（支持修改 URL）
+
+        Args:
+            old_url: 原 URL（用于定位）
+            new_url: 新 URL
+            title: 新标题
+            icon: 新图标
+
+        Returns:
+            更新后的该条统计，若原记录不存在则返回 None
+        """
+        with self._lock:
+            stats = self.load_stats(use_cache=False)
+            if old_url not in stats:
+                return None
+            entry = stats[old_url]
+            if old_url == new_url:
+                entry["title"] = title
+                entry["icon"] = icon
+                entry["url"] = new_url
+                self._save_stats_internal(stats)
+                return entry
+            # URL 变更：保留 count、lastVisit，用新 key 写入后删除旧 key
+            entry["title"] = title
+            entry["icon"] = icon
+            entry["url"] = new_url
+            stats[new_url] = entry
+            del stats[old_url]
+            self._save_stats_internal(stats)
+            return entry
+
     def invalidate_cache(self) -> None:
         """使缓存失效"""
         with self._lock:

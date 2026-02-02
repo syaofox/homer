@@ -6,8 +6,8 @@
       "items": [
         {
           "title": "股市假期",
-          "icon": "img/tdx.ico",
-          "url": "https://www.tdx.com.cn/url/holiday/"
+          "url": "https://www.tdx.com.cn/url/holiday/",
+          "icon": "img/tdx.ico"
         },
         {
           "title": "抖音违禁词",

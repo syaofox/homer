@@ -245,14 +245,18 @@ $(document).ready(function() {
             }, $target);
         } else if (action === 'delete') {
             if (!confirm('确定删除该项目吗？')) { $contextMenu.hide(); return; }
+            const deleteData = {
+                action: 'delete',
+                category: category,
+                title: title
+            };
+            if (category === '常用') {
+                deleteData.url = $target.attr('href') || '';
+            }
             $.ajax({
                 url: '/config',
                 method: 'POST',
-                data: {
-                    action: 'delete',
-                    category: category,
-                    title: title
-                },
+                data: deleteData,
                 success: function() {
                     // 前端移除
                     $target.remove();
@@ -347,6 +351,7 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
     $form.mode.value = initial.mode;
     $form.old_category.value = initial.category || '';
     $form.old_title.value = initial.title || '';
+    $formJq.find('input[name="old_url"]').val(initial.url || '');
     $formJq.find('select[name="category_select"]').val(initial.category || '');
     $formJq.find('input[name="title_input"]').val(initial.title || '');
     $formJq.find('input[name="url_input"]').val(initial.url || '');
@@ -389,6 +394,7 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
             formData.append('action', 'edit');
             formData.append('old_category', $form.old_category.value);
             formData.append('old_title', $form.old_title.value);
+            formData.append('old_url', $formJq.find('input[name="old_url"]').val() || '');
             formData.append('new_category', newCategory);
             formData.append('new_title', newTitle);
             formData.append('new_url', newUrl);
@@ -429,19 +435,22 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
                     $targetItem.attr('href', newUrl);
                     $targetItem.attr('data-title', newTitle);
                     $targetItem.find('span').text(newTitle);
-                    // 若分类改变，将卡片移至对应分组
-                    const oldGrid = $targetItem.closest('.nav-grid');
-                    const newGrid = $('.nav-grid').filter(function(){
-                        return $(this).prev('h2').text() === newCategory;
-                    }).first();
-                    if (newGrid.length && !oldGrid.is(newGrid)) {
-                        const $addBtn = newGrid.find('.add-item');
-                        if ($addBtn.length) {
-                            $targetItem.insertBefore($addBtn);
-                        } else {
-                            newGrid.append($targetItem);
+                    // 常用分组只原地更新，不移动；其它分类若改变则移至对应分组
+                    const oldCategory = $form.old_category.value;
+                    if (oldCategory !== '常用') {
+                        const oldGrid = $targetItem.closest('.nav-grid');
+                        const newGrid = $('.nav-grid').filter(function(){
+                            return $(this).prev('h2').text() === newCategory;
+                        }).first();
+                        if (newGrid.length && !oldGrid.is(newGrid)) {
+                            const $addBtn = newGrid.find('.add-item');
+                            if ($addBtn.length) {
+                                $targetItem.insertBefore($addBtn);
+                            } else {
+                                newGrid.append($targetItem);
+                            }
+                            $targetItem.attr('data-category', newCategory);
                         }
-                        $targetItem.attr('data-category', newCategory);
                     }
                 }
                 close();
