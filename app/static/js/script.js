@@ -260,6 +260,8 @@ $(document).ready(function() {
                 success: function() {
                     // 前端移除
                     $target.remove();
+                    // 刷新常用区（后端可能已同步移除 visit_stats）
+                    initVisitStats();
                 }
             });
         }
@@ -454,6 +456,8 @@ function openEditModal(initial, $targetItem, $gridForAdd) {
                     }
                 }
                 close();
+                // 刷新常用区（后端可能已同步更新 visit_stats）
+                initVisitStats();
             }
         });
     });

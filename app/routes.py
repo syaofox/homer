@@ -163,6 +163,18 @@ def handle_edit_item():
         config_manager.remove_item_from_category(old_category, old_title)
         config_manager.add_item_to_category(new_category, updated_item)
 
+    # 若常用区有该项目的统计（按原 url），同步更新
+    old_item_url = (original_item.get("url") or "").strip()
+    if old_item_url:
+        stats = visit_stats_manager.load_stats()
+        if old_item_url in stats:
+            visit_stats_manager.update_stat(
+                old_item_url,
+                new_url,
+                new_title,
+                updated_item["icon"],
+            )
+
     return jsonify({"success": True, "message": "项目已更新"})
 
 def handle_delete_item():
@@ -188,11 +200,20 @@ def handle_delete_item():
 
     title = request.form.get("title")
 
-    # 检查项目是否存在
-    if not config_manager.find_item_in_category(category_name, title):
+    # 检查项目是否存在并取得 url，用于同步常用区
+    item = config_manager.find_item_in_category(category_name, title)
+    if not item:
         return jsonify({"error": "项目未找到"}), 404
 
+    item_url = (item.get("url") or "").strip()
     config_manager.remove_item_from_category(category_name, title)
+
+    # 若常用区有该 url 的统计，同步移除
+    if item_url:
+        stats = visit_stats_manager.load_stats()
+        if item_url in stats:
+            visit_stats_manager.remove_stat(item_url)
+
     return jsonify({"success": True, "message": "项目已删除"})
 
 def handle_reorder_items():
