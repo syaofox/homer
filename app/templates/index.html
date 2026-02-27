@@ -142,7 +142,7 @@
         </div>
     </div>
     <!-- Hidden form for POSTing to /config -->
-    <form id="configForm" action="{{ url_for('config') }}" method="post" enctype="multipart/form-data" style="display:none;">
+    <form id="configForm" action="{{ url_for('main.config') }}" method="post" enctype="multipart/form-data" style="display:none;">
         <input type="hidden" name="action" value="">
         <input type="hidden" name="category" value="">
         <input type="hidden" name="title" value="">

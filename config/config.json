@@ -15,9 +15,14 @@
           "icon": "img/bilibili.png"
         },
         {
-          "title": "12312313123",
-          "icon": "img/bgm.ico",
-          "url": "https://bilibili.com"
+          "title": "示范点",
+          "url": "https://qq.com",
+          "icon": "img/bgm.ico"
+        },
+        {
+          "title": "234234",
+          "icon": "img/flatnote.ico",
+          "url": "https://www.tdx.com.cn/url/holiday/"
         }
       ]
     },

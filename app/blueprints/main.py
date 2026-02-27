@@ -1,69 +1,75 @@
-import json
 import os
 import logging
-from pypinyin import lazy_pinyin
+from functools import wraps
 
-from flask import redirect, render_template, request, url_for, jsonify
+from flask import Blueprint, render_template, request, jsonify, send_from_directory
+from pypinyin import lazy_pinyin
 from werkzeug.utils import secure_filename
 
-from app import app
-from app.config_manager import config_manager
-from app.visit_stats_manager import visit_stats_manager
 from app.config import config as app_config
-from app.utils import (
+from app.services import config_service, stats_service
+from app.core.validators import (
     validate_form_data,
-    error_handler,
     validate_title,
     validate_url,
     validate_category_name,
     sanitize_filename,
     format_error_message,
-    get_version,
 )
+from app.utils import icon_to_svg, is_fa_icon, get_version
 
-# 设置日志
 logger = logging.getLogger(__name__)
+
+main_bp = Blueprint("main", __name__)
 
 CONFIG_IMG_PATH = app_config.images_path
 
 
-@app.route("/")
+def error_handler(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except FileNotFoundError as e:
+            logger.error(f"文件未找到: {e}")
+            return jsonify({"error": "配置文件未找到"}), 404
+        except Exception as e:
+            logger.error(f"未知错误: {e}")
+            return jsonify({"error": "服务器内部错误"}), 500
+
+    return decorated_function
+
+
+@main_bp.route("/")
 @error_handler
 def index():
-    """主页 - 显示导航分类"""
-    try:
-        categories = config_manager.get_categories()
-        categories_data = [
-            {"name": category["name"], "nav_items": category["items"]}
-            for category in categories
-        ]
+    categories = config_service.get_categories()
+    categories_data = [
+        {"name": category["name"], "nav_items": category["items"]}
+        for category in categories
+    ]
 
-        visit_stats = visit_stats_manager.get_visit_stats()
-        top_sites = sorted(
-            visit_stats.values(), key=lambda x: x.get("count", 0), reverse=True
-        )[:20]
-        frequent_items = [s for s in top_sites if s.get("count", 0) > 0]
+    visit_stats = stats_service.get_visit_stats()
+    top_sites = sorted(
+        visit_stats.values(), key=lambda x: x.get("count", 0), reverse=True
+    )[:20]
+    frequent_items = [s for s in top_sites if s.get("count", 0) > 0]
 
-        return render_template(
-            "index.html",
-            categories=categories_data,
-            version=get_version(),
-            frequent_items=frequent_items,
-        )
-    except Exception as e:
-        logger.error(f"加载主页失败: {e}")
-        return render_template("index.html", categories=[], version=get_version())
+    return render_template(
+        "index.html",
+        categories=categories_data,
+        version=get_version(),
+        frequent_items=frequent_items,
+    )
 
 
-@app.route("/config", methods=["POST"])
+@main_bp.route("/config", methods=["POST"])
 @error_handler
 def config():
-    """配置 API - 处理首页的添加/编辑/删除/排序请求"""
     return handle_config_post()
 
 
 def handle_config_post():
-    """处理配置页面的POST请求"""
     action = request.form.get("action")
 
     if action == "add":
@@ -81,8 +87,6 @@ def handle_config_post():
 
 
 def handle_add_item():
-    """处理添加项目"""
-    # 验证输入数据
     validation = validate_form_data(request.form, ["category", "title", "url"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
@@ -92,27 +96,22 @@ def handle_add_item():
     url = request.form.get("url")
     icon = request.files.get("icon")
 
-    # 处理图标
     if icon and icon.filename:
         filename = sanitize_filename(secure_filename(icon.filename))
         if not filename:
             return jsonify({"error": "无效的文件名"}), 400
-
         icon.save(os.path.join(CONFIG_IMG_PATH, filename))
         icon_path = f"img/{filename}"
     else:
         icon_path = "fas fa-link"
 
-    # 添加项目
     new_item = {"title": title, "icon": icon_path, "url": url}
-    config_manager.add_item_to_category(category, new_item)
+    config_service.add_item_to_category(category, new_item)
 
     return jsonify({"success": True, "message": "项目已添加"})
 
 
 def handle_edit_item():
-    """处理编辑项目"""
-    # 验证输入数据
     validation = validate_form_data(
         request.form,
         ["old_category", "old_title", "new_category", "new_title", "new_url"],
@@ -128,11 +127,9 @@ def handle_edit_item():
     new_icon = request.files.get("new_icon")
     old_url = request.form.get("old_url", "").strip()
 
-    # 常用分组不支持编辑，仅支持删除
     if old_category == "常用":
         return jsonify({"error": "常用项目不支持编辑，仅支持删除"}), 400
 
-    # 处理新图标（非常用）
     icon_path = None
     if new_icon and new_icon.filename:
         filename = sanitize_filename(secure_filename(new_icon.filename))
@@ -140,12 +137,10 @@ def handle_edit_item():
             new_icon.save(os.path.join(CONFIG_IMG_PATH, filename))
             icon_path = f"img/{filename}"
 
-    # 获取原项目信息
-    original_item = config_manager.find_item_in_category(old_category, old_title)
+    original_item = config_service.find_item_in_category(old_category, old_title)
     if not original_item:
         return jsonify({"error": "项目未找到"}), 404
 
-    # 创建更新后的项目
     updated_item = {
         "title": new_title,
         "url": new_url,
@@ -153,19 +148,16 @@ def handle_edit_item():
     }
 
     if old_category == new_category:
-        # 同一分类内更新
-        config_manager.update_item_in_category(old_category, old_title, updated_item)
+        config_service.update_item_in_category(old_category, old_title, updated_item)
     else:
-        # 跨分类更新 - 先删除再添加
-        config_manager.remove_item_from_category(old_category, old_title)
-        config_manager.add_item_to_category(new_category, updated_item)
+        config_service.remove_item_from_category(old_category, old_title)
+        config_service.add_item_to_category(new_category, updated_item)
 
-    # 若常用区有该项目的统计（按原 url），同步更新
     old_item_url = (original_item.get("url") or "").strip()
     if old_item_url:
-        stats = visit_stats_manager.load_stats()
+        stats = stats_service.get_visit_stats()
         if old_item_url in stats:
-            visit_stats_manager.update_stat(
+            stats_service.update_stat(
                 old_item_url,
                 new_url,
                 new_title,
@@ -176,20 +168,18 @@ def handle_edit_item():
 
 
 def handle_delete_item():
-    """处理删除项目"""
     category_name = request.form.get("category")
     if not category_name:
         return jsonify({"error": "分类名称是必需的"}), 400
 
-    # 常用分组：删除写入 visit_stats.json
     if category_name == "常用":
         url = request.form.get("url", "").strip()
         if not url:
             return jsonify({"error": "常用项目删除需要提供 url"}), 400
-        stats = visit_stats_manager.load_stats()
+        stats = stats_service.get_visit_stats()
         if url not in stats:
             return jsonify({"error": "项目未找到"}), 404
-        visit_stats_manager.remove_stat(url)
+        stats_service.remove_stat(url)
         return jsonify({"success": True, "message": "项目已删除"})
 
     validation = validate_form_data(request.form, ["category", "title"])
@@ -198,32 +188,28 @@ def handle_delete_item():
 
     title = request.form.get("title")
 
-    # 检查项目是否存在并取得 url，用于同步常用区
-    item = config_manager.find_item_in_category(category_name, title)
+    item = config_service.find_item_in_category(category_name, title)
     if not item:
         return jsonify({"error": "项目未找到"}), 404
 
     item_url = (item.get("url") or "").strip()
-    config_manager.remove_item_from_category(category_name, title)
+    config_service.remove_item_from_category(category_name, title)
 
-    # 若常用区有该 url 的统计，同步移除
     if item_url:
-        stats = visit_stats_manager.load_stats()
+        stats = stats_service.get_visit_stats()
         if item_url in stats:
-            visit_stats_manager.remove_stat(item_url)
+            stats_service.remove_stat(item_url)
 
     return jsonify({"success": True, "message": "项目已删除"})
 
 
 def handle_reorder_items():
-    """处理重新排序项目"""
     category_name = request.form.get("category")
     if not category_name:
         return jsonify({"error": "分类名称是必需的"}), 400
 
     order = request.form.getlist("order[]") or request.form.get("order")
 
-    # 支持逗号分隔字符串或多值数组
     if isinstance(order, str):
         order_list = [t.strip() for t in order.split(",") if t.strip()]
     elif isinstance(order, list):
@@ -234,12 +220,11 @@ def handle_reorder_items():
     if not order_list:
         return jsonify({"error": "排序列表不能为空"}), 400
 
-    config_manager.reorder_items_in_category(category_name, order_list)
+    config_service.reorder_items_in_category(category_name, order_list)
     return jsonify({"success": True, "message": "项目顺序已更新"})
 
 
 def handle_move_item():
-    """处理移动项目"""
     validation = validate_form_data(request.form, ["category", "title"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
@@ -248,40 +233,34 @@ def handle_move_item():
     item_title = request.form.get("title")
     action = request.form.get("action")
 
-    # 检查项目是否存在
-    if not config_manager.find_item_in_category(category_name, item_title):
+    if not config_service.find_item_in_category(category_name, item_title):
         return jsonify({"error": "项目未找到"}), 404
 
     direction = "up" if action == "move_up" else "down"
-    config_manager.move_item_in_category(category_name, item_title, direction)
+    config_service.move_item_in_category(category_name, item_title, direction)
 
     return jsonify({"success": True, "message": "项目顺序已更新"})
 
 
-@app.route("/search")
+@main_bp.route("/search")
 @error_handler
 def search():
-    """搜索功能 - 支持中文、拼音和URL搜索"""
     search_term = request.args.get("term", "").strip()
-
     if not search_term:
         return jsonify([])
 
     search_term_lower = search_term.lower()
 
     try:
-        categories = config_manager.get_categories()
+        categories = config_service.get_categories()
         results = []
 
         for category in categories:
             for item in category.get("items", []):
                 title = item.get("title", "")
                 url = item.get("url", "")
-
-                # 生成拼音
                 title_pinyin = "".join(lazy_pinyin(title)).lower()
 
-                # 搜索匹配逻辑（移除冗余的正则匹配）
                 if (
                     search_term_lower in title.lower()
                     or search_term_lower in url.lower()
@@ -296,25 +275,22 @@ def search():
         return jsonify([])
 
 
-@app.route("/api/visit-stats", methods=["GET"])
+@main_bp.route("/api/visit-stats", methods=["GET"])
 @error_handler
 def get_visit_stats():
-    """获取访问统计数据"""
     try:
-        stats = visit_stats_manager.get_visit_stats()
+        stats = stats_service.get_visit_stats()
         return jsonify(stats)
     except Exception as e:
         logger.error(f"获取访问统计失败: {e}")
         return jsonify({}), 500
 
 
-@app.route("/api/visit-stats/record", methods=["POST"])
+@main_bp.route("/api/visit-stats/record", methods=["POST"])
 @error_handler
 def record_visit():
-    """记录一次访问"""
     try:
         data = request.get_json()
-
         if not data:
             return jsonify({"error": "无效的请求数据"}), 400
 
@@ -325,9 +301,7 @@ def record_visit():
         if not url or not title:
             return jsonify({"error": "url和title是必需的"}), 400
 
-        # 记录访问
-        updated_stat = visit_stats_manager.record_visit(url, title, icon)
-
+        updated_stat = stats_service.record_visit(url, title, icon)
         return jsonify({"success": True, "data": updated_stat})
 
     except Exception as e:
