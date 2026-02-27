@@ -303,6 +303,16 @@ function openEditModal(initial, targetItem, gridForAdd) {
     if (urlInput) urlInput.value = initial.url || '';
     var iconInput = form.querySelector('input[name="icon_input"]');
     if (iconInput) iconInput.value = '';
+    var iconSelect = form.querySelector('input[name="icon_select"]');
+    if (iconSelect) iconSelect.value = initial.icon || '';
+
+    var clearBtn = form.querySelector('.icon-clear-btn');
+    if (clearBtn) {
+        clearBtn.onclick = function() {
+            if (iconSelect) iconSelect.value = '';
+            if (iconInput) iconInput.value = '';
+        };
+    }
 
     modal.style.display = '';
 
@@ -344,13 +354,19 @@ function openEditModal(initial, targetItem, gridForAdd) {
         var newUrl = (form.querySelector('input[name="url_input"]') || {}).value || '';
         var iconFileInput = form.querySelector('input[name="icon_input"]');
         var iconFile = iconFileInput && iconFileInput.files ? iconFileInput.files[0] : null;
+        var iconSelect = form.querySelector('input[name="icon_select"]');
+        var iconSelectValue = iconSelect ? iconSelect.value.trim() : '';
 
         if (mode === 'add') {
             formData.append('action', 'add');
             formData.append('category', newCategory);
             formData.append('title', newTitle);
             formData.append('url', newUrl);
-            if (iconFile) formData.append('icon', iconFile);
+            if (iconFile) {
+                formData.append('icon', iconFile);
+            } else if (iconSelectValue) {
+                formData.append('icon_path', iconSelectValue);
+            }
         } else {
             formData.append('action', 'edit');
             formData.append('old_category', form.old_category.value);
@@ -359,7 +375,11 @@ function openEditModal(initial, targetItem, gridForAdd) {
             formData.append('new_category', newCategory);
             formData.append('new_title', newTitle);
             formData.append('new_url', newUrl);
-            if (iconFile) formData.append('new_icon', iconFile);
+            if (iconFile) {
+                formData.append('new_icon', iconFile);
+            } else if (iconSelectValue) {
+                formData.append('new_icon_path', iconSelectValue);
+            }
         }
 
         fetch('/config', {
@@ -374,7 +394,14 @@ function openEditModal(initial, targetItem, gridForAdd) {
                     newItem.setAttribute('data-category', newCategory);
                     newItem.setAttribute('data-title', newTitle);
 
-                    if (iconFile) {
+                    if (iconSelectValue) {
+                        var img = document.createElement('img');
+                        img.className = 'icon-img';
+                        img.alt = newTitle;
+                        img.src = '/config/' + iconSelectValue;
+                        newItem.appendChild(img);
+                        newItem.setAttribute('data-icon', iconSelectValue);
+                    } else if (iconFile) {
                         var img = document.createElement('img');
                         img.className = 'icon-img';
                         img.alt = newTitle;
@@ -422,6 +449,34 @@ function openEditModal(initial, targetItem, gridForAdd) {
                     targetItem.setAttribute('data-title', newTitle);
                     var textSpanEl = targetItem.querySelector('span:not(.nav-item-icon)');
                     if (textSpanEl) textSpanEl.textContent = newTitle;
+
+                    if (iconFile) {
+                        var iconImg = targetItem.querySelector('img.icon-img');
+                        var existingIcon = targetItem.querySelector('.nav-item-icon');
+                        if (iconImg) {
+                            iconImg.src = '/config/' + initial.icon;
+                        } else if (existingIcon) {
+                            var newImg = document.createElement('img');
+                            newImg.className = 'icon-img';
+                            newImg.alt = newTitle;
+                            newImg.src = '/config/' + initial.icon;
+                            existingIcon.replaceWith(newImg);
+                        }
+                        targetItem.setAttribute('data-icon', initial.icon);
+                    } else if (iconSelectValue) {
+                        var existingImg2 = targetItem.querySelector('img.icon-img');
+                        var existingIcon2 = targetItem.querySelector('.nav-item-icon');
+                        if (existingImg2) {
+                            existingImg2.src = '/config/' + iconSelectValue;
+                        } else if (existingIcon2) {
+                            var newImg2 = document.createElement('img');
+                            newImg2.className = 'icon-img';
+                            newImg2.alt = newTitle;
+                            newImg2.src = '/config/' + iconSelectValue;
+                            existingIcon2.replaceWith(newImg2);
+                        }
+                        targetItem.setAttribute('data-icon', iconSelectValue);
+                    }
 
                     var oldCategory = form.old_category.value;
                     if (oldCategory !== '常用') {
@@ -539,7 +594,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     mode: 'edit',
                     category: category,
                     title: title,
-                    url: contextTarget.getAttribute('href') || ''
+                    url: contextTarget.getAttribute('href') || '',
+                    icon: contextTarget.getAttribute('data-icon') || ''
                 }, contextTarget, null);
             } else if (action === 'delete') {
                 if (!confirm('确定删除该项目吗？')) {

@@ -55,11 +55,22 @@ def index():
     )[:20]
     frequent_items = [s for s in top_sites if s.get("count", 0) > 0]
 
+    icon_files = []
+    if os.path.exists(CONFIG_IMG_PATH):
+        icon_files = sorted(
+            [
+                f
+                for f in os.listdir(CONFIG_IMG_PATH)
+                if os.path.isfile(os.path.join(CONFIG_IMG_PATH, f))
+            ]
+        )
+
     return render_template(
         "index.html",
         categories=categories_data,
         version=get_version(),
         frequent_items=frequent_items,
+        icon_files=icon_files,
     )
 
 
@@ -95,8 +106,11 @@ def handle_add_item():
     title = request.form.get("title")
     url = request.form.get("url")
     icon = request.files.get("icon")
+    icon_path_param = request.form.get("icon_path")
 
-    if icon and icon.filename:
+    if icon_path_param:
+        icon_path = icon_path_param
+    elif icon and icon.filename:
         filename = sanitize_filename(secure_filename(icon.filename))
         if not filename:
             return jsonify({"error": "无效的文件名"}), 400
@@ -125,13 +139,16 @@ def handle_edit_item():
     new_title = request.form.get("new_title")
     new_url = request.form.get("new_url").strip()
     new_icon = request.files.get("new_icon")
+    new_icon_path_param = request.form.get("new_icon_path")
     old_url = request.form.get("old_url", "").strip()
 
     if old_category == "常用":
         return jsonify({"error": "常用项目不支持编辑，仅支持删除"}), 400
 
     icon_path = None
-    if new_icon and new_icon.filename:
+    if new_icon_path_param:
+        icon_path = new_icon_path_param
+    elif new_icon and new_icon.filename:
         filename = sanitize_filename(secure_filename(new_icon.filename))
         if filename:
             new_icon.save(os.path.join(CONFIG_IMG_PATH, filename))

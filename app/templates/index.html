@@ -131,7 +131,19 @@
 
                 <label>
                     图标
-                    <input type="file" name="icon_input" accept="image/*">
+                    <div class="icon-select-container">
+                        <div class="icon-select-row">
+                            <input type="text" name="icon_select" list="icon-list" placeholder="选择本地图标或输入筛选..." autocomplete="off">
+                            <button type="button" class="icon-clear-btn" title="清空选择">&times;</button>
+                        </div>
+                        <datalist id="icon-list">
+                            {% for icon in icon_files %}
+                            <option value="img/{{ icon }}">{{ icon }}</option>
+                            {% endfor %}
+                        </datalist>
+                        <span class="icon-select-divider">或</span>
+                        <input type="file" name="icon_input" accept="image/*">
+                    </div>
                 </label>
 
                 <div class="modal-actions">
