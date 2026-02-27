@@ -305,13 +305,57 @@ function openEditModal(initial, targetItem, gridForAdd) {
     if (iconInput) iconInput.value = '';
     var iconSelect = form.querySelector('input[name="icon_select"]');
     if (iconSelect) iconSelect.value = initial.icon || '';
+    var iconPreviewImg = form.querySelector('.icon-preview img');
+
+    function updateIconPreview(src) {
+        if (iconPreviewImg) {
+            if (src) {
+                iconPreviewImg.src = src;
+                iconPreviewImg.style.display = '';
+            } else {
+                iconPreviewImg.src = '';
+                iconPreviewImg.style.display = 'none';
+            }
+        }
+    }
+
+    if (initial.icon && initial.icon.startsWith('img/')) {
+        updateIconPreview('/config/' + initial.icon);
+    } else {
+        updateIconPreview('');
+    }
 
     var clearBtn = form.querySelector('.icon-clear-btn');
     if (clearBtn) {
         clearBtn.onclick = function() {
             if (iconSelect) iconSelect.value = '';
             if (iconInput) iconInput.value = '';
+            updateIconPreview('');
         };
+    }
+
+    if (iconSelect) {
+        iconSelect.addEventListener('input', function() {
+            var val = this.value.trim();
+            if (val) {
+                updateIconPreview('/config/' + val);
+            } else {
+                updateIconPreview('');
+            }
+        });
+    }
+
+    if (iconInput) {
+        iconInput.addEventListener('change', function() {
+            if (currentBlobUrl) {
+                URL.revokeObjectURL(currentBlobUrl);
+                currentBlobUrl = '';
+            }
+            if (this.files && this.files[0]) {
+                currentBlobUrl = URL.createObjectURL(this.files[0]);
+                updateIconPreview(currentBlobUrl);
+            }
+        });
     }
 
     modal.style.display = '';
@@ -321,7 +365,12 @@ function openEditModal(initial, targetItem, gridForAdd) {
         if (ti) ti.focus();
     }, 0);
 
+    var currentBlobUrl = '';
     function closeModal() {
+        if (currentBlobUrl) {
+            URL.revokeObjectURL(currentBlobUrl);
+            currentBlobUrl = '';
+        }
         modal.style.display = 'none';
         document.removeEventListener('keydown', escHandler);
         document.querySelectorAll('.modal-close, .modal-cancel').forEach(function(btn) {
