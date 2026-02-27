@@ -5,12 +5,38 @@
 import json
 import re
 import os
+import tomllib
+from pathlib import Path
 from typing import Any, Optional, Dict, List
 from functools import wraps
 from urllib.parse import urlparse
 import logging
 
 logger = logging.getLogger(__name__)
+
+_VERSION_CACHE: Optional[str] = None
+
+
+def get_version() -> str:
+    """
+    从 pyproject.toml 解析项目版本号。
+    使用模块级缓存，首次调用解析，后续直接返回。
+    若解析失败则返回 "unknown"。
+    """
+    global _VERSION_CACHE
+    if _VERSION_CACHE is not None:
+        return _VERSION_CACHE
+    try:
+        pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+            _VERSION_CACHE = data["project"]["version"]
+            return _VERSION_CACHE
+    except Exception as e:
+        logger.warning(f"无法解析 pyproject.toml 版本: {e}")
+        _VERSION_CACHE = "unknown"
+        return _VERSION_CACHE
+
 
 # Font Awesome 5 图标到内联 SVG 的映射（用于替代 CDN，实现首屏秒开）
 # 图标路径来自 Font Awesome Free 5.15.4，CC BY 4.0

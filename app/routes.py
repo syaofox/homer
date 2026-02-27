@@ -13,7 +13,7 @@ from app.config import config as app_config
 from app.utils import (
     validate_form_data, error_handler,
     validate_title, validate_url, validate_category_name,
-    sanitize_filename, format_error_message
+    sanitize_filename, format_error_message, get_version
 )
 
 # 设置日志
@@ -31,10 +31,10 @@ def index():
             {"name": category["name"], "nav_items": category["items"]}
             for category in categories
         ]
-        return render_template("index.html", categories=categories_data)
+        return render_template("index.html", categories=categories_data, version=get_version())
     except Exception as e:
         logger.error(f"加载主页失败: {e}")
-        return render_template("index.html", categories=[])
+        return render_template("index.html", categories=[], version=get_version())
 
 
 @app.route("/config", methods=["GET", "POST"])

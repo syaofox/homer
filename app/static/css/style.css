@@ -354,3 +354,11 @@ form input, form select, form button {
 .badges-hidden .click-badge {
     display: none !important;
 }
+
+/* 底部版本号 */
+.version-footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 12px;
+    color: #999;
+}
