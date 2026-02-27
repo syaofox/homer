@@ -69,7 +69,8 @@ docker-compose up -d
 应用启动后，在浏览器中访问：
 
 - 主页：http://localhost:8080
-- 配置页：http://localhost:8080/config
+
+编辑功能（添加、编辑、删除、排序）在首页通过右键菜单和「新增」按钮完成。
 
 ## 配置说明
 

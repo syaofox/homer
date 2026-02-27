@@ -37,23 +37,11 @@ def index():
         return render_template("index.html", categories=[], version=get_version())
 
 
-@app.route("/config", methods=["GET", "POST"])
+@app.route("/config", methods=["POST"])
 @error_handler
 def config():
-    """配置管理页面"""
-    if request.method == "POST":
-        return handle_config_post()
-    
-    try:
-        categories = config_manager.get_categories()
-        categories_data = [
-            {"name": category["name"], "nav_items": category["items"]}
-            for category in categories
-        ]
-        return render_template("config.html", categories=categories_data)
-    except Exception as e:
-        logger.error(f"加载配置页面失败: {e}")
-        return render_template("config.html", categories=[])
+    """配置 API - 处理首页的添加/编辑/删除/排序请求"""
+    return handle_config_post()
 
 def handle_config_post():
     """处理配置页面的POST请求"""
