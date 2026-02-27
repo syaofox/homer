@@ -30,6 +30,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY app/ ./app/
 COPY main.py .
+COPY pyproject.toml .
 
 # 创建非 root 用户（使用固定 UID/GID 便于卷权限）
 RUN groupadd -r appuser -g 1000 && \

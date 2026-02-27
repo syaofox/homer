@@ -20,3 +20,4 @@ services:
     volumes:
       - ./config:/config
       - /etc/localtime:/etc/localtime:ro
+    user: "${UID:-1000}:${GID:-1000}"
