@@ -8,7 +8,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
 </head>
 <body>
-    <div class="container">       
+    <div class="container">
         <!-- 添加搜索输入框 -->
         <div class="search-container">
             <input type="text" id="search-input" placeholder="搜索标题或URL...">
@@ -21,6 +21,18 @@
                 </button>
             </div>
         </div>
+        <script>
+            (function() {
+                try {
+                    var stored = localStorage.getItem('badgesVisible');
+                    if (stored !== null && !JSON.parse(stored)) {
+                        document.body.classList.add('badges-hidden');
+                        var btn = document.getElementById('toggle-badges');
+                        if (btn) btn.classList.remove('active');
+                    }
+                } catch (e) {}
+            })();
+        </script>
 
         <!-- 添加搜索结果显示区域 -->
         <div id="search-results" class="nav-grid" style="display: none;"></div>
