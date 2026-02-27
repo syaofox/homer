@@ -10,14 +10,24 @@
           "icon": "img/tdx.ico"
         },
         {
-          "title": "抖音违禁词11",
+          "title": "抖音违禁词12312313123",
           "url": "https://www.doucici.com/1",
-          "icon": "img/favicon_2.ico"
+          "icon": "img/bilibili.png"
         },
         {
           "title": "12312313123",
           "icon": "img/bgm.ico",
           "url": "https://bilibili.com"
+        },
+        {
+          "title": "12313123",
+          "icon": "fas fa-link",
+          "url": "https://www.tdx.com.cn/url/holiday/"
+        },
+        {
+          "title": "214321424",
+          "icon": "fas fa-link",
+          "url": "http://10.10.10.2:8088/"
         }
       ]
     },
