@@ -502,16 +502,17 @@ function openEditModal(initial, targetItem, gridForAdd) {
                     if (iconFile) {
                         var iconImg = targetItem.querySelector('img.icon-img');
                         var existingIcon = targetItem.querySelector('.nav-item-icon');
+                        var newIconSrc = URL.createObjectURL(iconFile);
                         if (iconImg) {
-                            iconImg.src = '/config/' + initial.icon;
+                            iconImg.src = newIconSrc;
                         } else if (existingIcon) {
                             var newImg = document.createElement('img');
                             newImg.className = 'icon-img';
                             newImg.alt = newTitle;
-                            newImg.src = '/config/' + initial.icon;
+                            newImg.src = newIconSrc;
                             existingIcon.replaceWith(newImg);
                         }
-                        targetItem.setAttribute('data-icon', initial.icon);
+                        targetItem.setAttribute('data-icon', '');
                     } else if (iconSelectValue) {
                         var existingImg2 = targetItem.querySelector('img.icon-img');
                         var existingIcon2 = targetItem.querySelector('.nav-item-icon');
