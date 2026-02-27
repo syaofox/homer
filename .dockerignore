@@ -15,4 +15,8 @@ ENV/
 htmlcov/
 .idea/
 .vscode/
-*.log 
+*.log
+.git/
+.github/
+.cursor/
+*.plan.md
