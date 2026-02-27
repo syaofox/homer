@@ -11,15 +11,21 @@ from app.config_manager import config_manager
 from app.visit_stats_manager import visit_stats_manager
 from app.config import config as app_config
 from app.utils import (
-    validate_form_data, error_handler,
-    validate_title, validate_url, validate_category_name,
-    sanitize_filename, format_error_message, get_version
+    validate_form_data,
+    error_handler,
+    validate_title,
+    validate_url,
+    validate_category_name,
+    sanitize_filename,
+    format_error_message,
+    get_version,
 )
 
 # 设置日志
 logger = logging.getLogger(__name__)
 
 CONFIG_IMG_PATH = app_config.images_path
+
 
 @app.route("/")
 @error_handler
@@ -31,7 +37,19 @@ def index():
             {"name": category["name"], "nav_items": category["items"]}
             for category in categories
         ]
-        return render_template("index.html", categories=categories_data, version=get_version())
+
+        visit_stats = visit_stats_manager.get_visit_stats()
+        top_sites = sorted(
+            visit_stats.values(), key=lambda x: x.get("count", 0), reverse=True
+        )[:20]
+        frequent_items = [s for s in top_sites if s.get("count", 0) > 0]
+
+        return render_template(
+            "index.html",
+            categories=categories_data,
+            version=get_version(),
+            frequent_items=frequent_items,
+        )
     except Exception as e:
         logger.error(f"加载主页失败: {e}")
         return render_template("index.html", categories=[], version=get_version())
@@ -43,10 +61,11 @@ def config():
     """配置 API - 处理首页的添加/编辑/删除/排序请求"""
     return handle_config_post()
 
+
 def handle_config_post():
     """处理配置页面的POST请求"""
     action = request.form.get("action")
-    
+
     if action == "add":
         return handle_add_item()
     elif action == "edit":
@@ -60,13 +79,14 @@ def handle_config_post():
     else:
         return jsonify({"error": "未知操作"}), 400
 
+
 def handle_add_item():
     """处理添加项目"""
     # 验证输入数据
     validation = validate_form_data(request.form, ["category", "title", "url"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
-    
+
     category = request.form.get("category")
     title = request.form.get("title")
     url = request.form.get("url")
@@ -77,7 +97,7 @@ def handle_add_item():
         filename = sanitize_filename(secure_filename(icon.filename))
         if not filename:
             return jsonify({"error": "无效的文件名"}), 400
-        
+
         icon.save(os.path.join(CONFIG_IMG_PATH, filename))
         icon_path = f"img/{filename}"
     else:
@@ -86,13 +106,17 @@ def handle_add_item():
     # 添加项目
     new_item = {"title": title, "icon": icon_path, "url": url}
     config_manager.add_item_to_category(category, new_item)
-    
+
     return jsonify({"success": True, "message": "项目已添加"})
+
 
 def handle_edit_item():
     """处理编辑项目"""
     # 验证输入数据
-    validation = validate_form_data(request.form, ["old_category", "old_title", "new_category", "new_title", "new_url"])
+    validation = validate_form_data(
+        request.form,
+        ["old_category", "old_title", "new_category", "new_title", "new_url"],
+    )
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
 
@@ -125,7 +149,7 @@ def handle_edit_item():
     updated_item = {
         "title": new_title,
         "url": new_url,
-        "icon": icon_path if icon_path else original_item["icon"]
+        "icon": icon_path if icon_path else original_item["icon"],
     }
 
     if old_category == new_category:
@@ -149,6 +173,7 @@ def handle_edit_item():
             )
 
     return jsonify({"success": True, "message": "项目已更新"})
+
 
 def handle_delete_item():
     """处理删除项目"""
@@ -189,17 +214,18 @@ def handle_delete_item():
 
     return jsonify({"success": True, "message": "项目已删除"})
 
+
 def handle_reorder_items():
     """处理重新排序项目"""
     category_name = request.form.get("category")
     if not category_name:
         return jsonify({"error": "分类名称是必需的"}), 400
-    
+
     order = request.form.getlist("order[]") or request.form.get("order")
-    
+
     # 支持逗号分隔字符串或多值数组
     if isinstance(order, str):
-        order_list = [t.strip() for t in order.split(',') if t.strip()]
+        order_list = [t.strip() for t in order.split(",") if t.strip()]
     elif isinstance(order, list):
         order_list = [t.strip() for t in order if t.strip()]
     else:
@@ -211,12 +237,13 @@ def handle_reorder_items():
     config_manager.reorder_items_in_category(category_name, order_list)
     return jsonify({"success": True, "message": "项目顺序已更新"})
 
+
 def handle_move_item():
     """处理移动项目"""
     validation = validate_form_data(request.form, ["category", "title"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
-    
+
     category_name = request.form.get("category")
     item_title = request.form.get("title")
     action = request.form.get("action")
@@ -227,47 +254,49 @@ def handle_move_item():
 
     direction = "up" if action == "move_up" else "down"
     config_manager.move_item_in_category(category_name, item_title, direction)
-    
+
     return jsonify({"success": True, "message": "项目顺序已更新"})
 
 
-@app.route('/search')
+@app.route("/search")
 @error_handler
 def search():
     """搜索功能 - 支持中文、拼音和URL搜索"""
-    search_term = request.args.get('term', '').strip()
-    
+    search_term = request.args.get("term", "").strip()
+
     if not search_term:
         return jsonify([])
-    
+
     search_term_lower = search_term.lower()
-    
+
     try:
         categories = config_manager.get_categories()
         results = []
-        
+
         for category in categories:
-            for item in category.get('items', []):
-                title = item.get('title', '')
-                url = item.get('url', '')
-                
+            for item in category.get("items", []):
+                title = item.get("title", "")
+                url = item.get("url", "")
+
                 # 生成拼音
-                title_pinyin = ''.join(lazy_pinyin(title)).lower()
-                
+                title_pinyin = "".join(lazy_pinyin(title)).lower()
+
                 # 搜索匹配逻辑（移除冗余的正则匹配）
-                if (search_term_lower in title.lower() or 
-                    search_term_lower in url.lower() or 
-                    search_term_lower in title_pinyin):
+                if (
+                    search_term_lower in title.lower()
+                    or search_term_lower in url.lower()
+                    or search_term_lower in title_pinyin
+                ):
                     results.append(item)
-        
+
         return jsonify(results)
-        
+
     except Exception as e:
         logger.error(f"搜索失败: {e}")
         return jsonify([])
 
 
-@app.route('/api/visit-stats', methods=['GET'])
+@app.route("/api/visit-stats", methods=["GET"])
 @error_handler
 def get_visit_stats():
     """获取访问统计数据"""
@@ -279,31 +308,28 @@ def get_visit_stats():
         return jsonify({}), 500
 
 
-@app.route('/api/visit-stats/record', methods=['POST'])
+@app.route("/api/visit-stats/record", methods=["POST"])
 @error_handler
 def record_visit():
     """记录一次访问"""
     try:
         data = request.get_json()
-        
+
         if not data:
             return jsonify({"error": "无效的请求数据"}), 400
-        
-        url = data.get('url', '').strip()
-        title = data.get('title', '').strip()
-        icon = data.get('icon', 'fas fa-link')
-        
+
+        url = data.get("url", "").strip()
+        title = data.get("title", "").strip()
+        icon = data.get("icon", "fas fa-link")
+
         if not url or not title:
             return jsonify({"error": "url和title是必需的"}), 400
-        
+
         # 记录访问
         updated_stat = visit_stats_manager.record_visit(url, title, icon)
-        
-        return jsonify({
-            "success": True,
-            "data": updated_stat
-        })
-        
+
+        return jsonify({"success": True, "data": updated_stat})
+
     except Exception as e:
         logger.error(f"记录访问失败: {e}")
         return jsonify({"error": "记录访问失败"}), 500

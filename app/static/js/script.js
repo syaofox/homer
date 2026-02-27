@@ -35,6 +35,14 @@ let badgesVisible = true; // 角标显示状态
 
 // 初始化访问统计数据 - 从服务器获取
 function initVisitStats() {
+    if (window.frequentItemsFromServer && window.frequentItemsFromServer.length > 0) {
+        visitStats = {};
+        window.frequentItemsFromServer.forEach(function(item) {
+            visitStats[item.url] = item;
+        });
+        renderFrequentCategory();
+        return;
+    }
     fetch('/api/visit-stats', { method: 'GET' })
         .then(function(res) { return res.json(); })
         .then(function(data) {

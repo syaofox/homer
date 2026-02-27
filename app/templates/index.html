@@ -26,7 +26,26 @@
         <div id="search-results" class="nav-grid" style="display: none;"></div>
 
         <!-- 常用分类容器 -->
-        <div id="frequent-category" style="display: none;"></div>
+        <div id="frequent-category" {% if not frequent_items %}style="display: none;"{% endif %}>
+            {% if frequent_items %}
+            <h2>常用</h2>
+            <div class="nav-grid">
+                {% for item in frequent_items %}
+                <a href="{{ item.url }}" class="nav-item" data-category="常用" data-title="{{ item.title }}" data-icon="{{ item.icon }}">
+                    {% if is_fa_icon(item.icon) %}
+                        <span class="nav-item-icon">{{ icon_to_svg(item.icon)|safe }}</span>
+                    {% else %}
+                        <img src="/config/{{ item.icon }}" alt="{{ item.title }}" class="icon-img">
+                    {% endif %}
+                    <span>{{ item.title }}</span>
+                    {% if item.count > 0 %}
+                    <div class="click-badge">{{ item.count }}</div>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
 
         <!-- 原有的导航内容 -->
         <div id="original-content">
@@ -57,6 +76,9 @@
     <footer class="version-footer">
         <span>v{{ version }}</span>
     </footer>
+    <script>
+        window.frequentItemsFromServer = {{ frequent_items|tojson }};
+    </script>
     <script src="{{ url_for('static', filename='js/script.js') }}" defer data-sortable-src="{{ url_for('static', filename='js/sortable.min.js') }}"></script>
     <!-- Context menu -->
     <div id="context-menu" class="context-menu" style="display:none;">
