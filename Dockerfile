@@ -40,4 +40,4 @@ RUN groupadd -r appuser -g 1000 && \
 USER appuser
 EXPOSE 8080
 ENV PYTHONUNBUFFERED=1
-CMD ["waitress-serve", "--host=0.0.0.0", "--port=8080", "--call", "main:create_app"]
+CMD ["waitress-serve", "--host=0.0.0.0", "--port=8080", "--threads", "8", "--call", "main:create_app"]
