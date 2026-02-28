@@ -129,7 +129,7 @@ function getTopVisitedSites(limit) {
     limit = limit || 20;
     const sites = Object.values(visitStats);
     return sites
-        .sort(function(a, b) { return b.count - a.count; })
+        .sort(function(a, b) { return b.visit_count - a.visit_count; })
         .slice(0, limit);
 }
 
@@ -170,10 +170,10 @@ function renderFrequentCategory() {
             item.appendChild(img);
         }
 
-        if (site.count > 0) {
+        if (site.visit_count > 0) {
             var badge = document.createElement('div');
             badge.className = 'click-badge';
-            badge.textContent = site.count;
+            badge.textContent = site.visit_count;
             item.appendChild(badge);
         }
 
@@ -597,27 +597,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Right-click context menu for nav items
-    var contextMenu = document.getElementById('context-menu');
-    var contextTarget = null;
-
-    // 添加第一个分类按钮
-    var addFirstCategoryBtn = document.getElementById('add-first-category');
-    if (addFirstCategoryBtn) {
-        addFirstCategoryBtn.addEventListener('click', function() {
-            var modal = document.getElementById('add-category-modal');
-            if (modal) modal.style.display = '';
-            var input = modal ? modal.querySelector('input[name="category_name"]') : null;
-            if (input) setTimeout(function() { input.focus(); }, 0);
-        });
-    }
-
     // 添加分类弹窗的关闭和提交逻辑
     var addCategoryModal = document.getElementById('add-category-modal');
+    var addCategoryForm = addCategoryForm || null;
+    var addCatCloseBtns, addCatEscHandler;
+    
+    function openAddCategoryModal(mode, oldCategoryName) {
+        var modal = addCategoryModal;
+        if (!modal) return;
+        
+        var form = modal.querySelector('form');
+        var titleEl = document.getElementById('category-modal-title');
+        var modeInput = form ? form.querySelector('input[name="mode"]') : null;
+        var oldCatInput = form ? form.querySelector('input[name="old_category"]') : null;
+        var nameInput = form ? form.querySelector('input[name="category_name"]') : null;
+        
+        if (titleEl) {
+            titleEl.textContent = mode === 'edit' ? '编辑分类' : '添加分类';
+        }
+        if (modeInput) modeInput.value = mode || 'add';
+        if (oldCatInput) oldCatInput.value = oldCategoryName || '';
+        if (nameInput) nameInput.value = mode === 'edit' ? (oldCategoryName || '') : '';
+        
+        modal.style.display = '';
+        setTimeout(function() { if (nameInput) nameInput.focus(); }, 0);
+    }
+
     if (addCategoryModal) {
-        var addCategoryForm = addCategoryModal.querySelector('form');
-        var addCatCloseBtns = addCategoryModal.querySelectorAll('.modal-close, .modal-cancel');
-        var addCatEscHandler = function(e) { if (e.key === 'Escape') addCategoryModal.style.display = 'none'; };
+        addCategoryForm = addCategoryModal.querySelector('form');
+        addCatCloseBtns = addCategoryModal.querySelectorAll('.modal-close, .modal-cancel');
+        addCatEscHandler = function(e) { if (e.key === 'Escape') addCategoryModal.style.display = 'none'; };
         
         addCatCloseBtns.forEach(function(btn) {
             btn.addEventListener('click', function() { addCategoryModal.style.display = 'none'; });
@@ -631,17 +640,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 var categoryName = input ? input.value.trim() : '';
                 if (!categoryName) return;
 
+                var mode = (addCategoryForm.querySelector('input[name="mode"]') || {}).value || 'add';
+                var oldCategory = (addCategoryForm.querySelector('input[name="old_category"]') || {}).value || '';
+                
                 var formData = new FormData();
-                formData.append('action', 'add_category');
-                formData.append('category', categoryName);
+                if (mode === 'edit' && oldCategory) {
+                    formData.append('action', 'edit_category');
+                    formData.append('old_category', oldCategory);
+                    formData.append('new_category', categoryName);
+                } else {
+                    formData.append('action', 'add_category');
+                    formData.append('category', categoryName);
+                }
 
                 fetch('/config', { method: 'POST', body: formData })
                     .then(function() { return fetch('/'); })
                     .then(function() { window.location.reload(); })
-                    .catch(function(err) { console.warn('添加分类失败:', err); });
+                    .catch(function(err) { console.warn('保存分类失败:', err); });
             });
         }
     }
+
+    // 空状态的添加分类按钮
+    var addFirstCategoryBtn = document.getElementById('add-first-category');
+    if (addFirstCategoryBtn) {
+        addFirstCategoryBtn.addEventListener('click', function() {
+            openAddCategoryModal('add', '');
+        });
+    }
+
+    // 每个分类标题后的添加分类按钮
+    document.addEventListener('click', function(e) {
+        var addCatBtn = e.target.closest('.add-category-btn');
+        if (!addCatBtn) return;
+        var header = addCatBtn.closest('.category-header');
+        var categoryName = header ? header.dataset.category : '';
+        openAddCategoryModal('add', categoryName);
+    });
+
+    // 右键菜单 for items
+    var contextMenu = document.getElementById('context-menu');
+    var categoryContextMenu = document.getElementById('category-context-menu');
+    var contextTarget = null;
+    var categoryContextTarget = null;
 
     document.addEventListener('contextmenu', function(e) {
         var target = e.target.closest('.nav-item:not(.add-item)');
@@ -714,6 +755,62 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             contextMenu.style.display = 'none';
+        });
+    }
+
+    // 分类标题右键菜单
+    document.addEventListener('contextmenu', function(e) {
+        var target = e.target.closest('.category-header');
+        if (!target) return;
+        e.preventDefault();
+        
+        var categoryName = target.dataset.category || '';
+        if (categoryName === '常用') return;
+        
+        categoryContextTarget = target;
+        if (categoryContextMenu) {
+            categoryContextMenu.style.top = e.pageY + 'px';
+            categoryContextMenu.style.left = e.pageX + 'px';
+            categoryContextMenu.style.display = '';
+        }
+    });
+
+    document.addEventListener('click', function() {
+        if (categoryContextMenu) categoryContextMenu.style.display = 'none';
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && categoryContextMenu) categoryContextMenu.style.display = 'none';
+    });
+
+    if (categoryContextMenu) {
+        categoryContextMenu.addEventListener('click', function(e) {
+            var li = e.target.closest('li');
+            if (!li || !categoryContextTarget) return;
+            e.stopPropagation();
+            
+            var action = li.dataset.action;
+            var categoryName = categoryContextTarget.dataset.category || '';
+            
+            if (action === 'edit-category') {
+                openAddCategoryModal('edit', categoryName);
+            } else if (action === 'delete-category') {
+                if (!confirm('确定删除分类"' + categoryName + '"吗？该分类下的所有项目也会被删除。')) {
+                    categoryContextMenu.style.display = 'none';
+                    return;
+                }
+                var deleteData = new FormData();
+                deleteData.append('action', 'delete_category');
+                deleteData.append('category', categoryName);
+                
+                fetch('/config', {
+                    method: 'POST',
+                    body: deleteData
+                })
+                    .then(function() { window.location.reload(); })
+                    .catch(function(err) { console.warn('删除分类失败:', err); });
+            }
+            
+            categoryContextMenu.style.display = 'none';
         });
     }
 

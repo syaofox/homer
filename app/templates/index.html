@@ -50,8 +50,8 @@
                         <img src="/config/{{ item.icon }}" alt="{{ item.title }}" class="icon-img">
                     {% endif %}
                     <span>{{ item.title }}</span>
-                    {% if item.count > 0 %}
-                    <div class="click-badge">{{ item.count }}</div>
+                    {% if item.visit_count > 0 %}
+                    <div class="click-badge">{{ item.visit_count }}</div>
                     {% endif %}
                 </a>
                 {% endfor %}
@@ -68,7 +68,12 @@
         <!-- 原有的导航内容 -->
         <div id="original-content" {% if not categories %}style="display: none;"{% endif %}>
             {% for category in categories %}
-            <h2>{{ category.name }}</h2>
+            <div class="category-header" data-category="{{ category.name }}">
+                <h2>{{ category.name }}</h2>
+                <button class="add-category-btn" title="新增分类">
+                    <span class="nav-item-icon">{{ icon_to_svg('fas fa-plus')|safe }}</span>
+                </button>
+            </div>
             <div class="nav-grid">
                 {% for item in category.nav_items %}
                 <a href="{{ item.url }}" class="nav-item" data-category="{{ category.name }}" data-title="{{ item.title }}" data-icon="{{ item.icon }}">
@@ -88,6 +93,7 @@
                     <span>新增</span>
                 </a>
             </div>
+            </div>
             {% endfor %}
         </div>
     </div>
@@ -98,11 +104,18 @@
         window.frequentItemsFromServer = {{ frequent_items|tojson }};
     </script>
     <script src="{{ url_for('static', filename='js/script.js') }}" defer data-sortable-src="{{ url_for('static', filename='js/sortable.min.js') }}"></script>
-    <!-- Context menu -->
+    <!-- Context menu for items -->
     <div id="context-menu" class="context-menu" style="display:none;">
         <ul>
             <li data-action="edit">编辑</li>
             <li data-action="delete">删除</li>
+        </ul>
+    </div>
+    <!-- Context menu for categories -->
+    <div id="category-context-menu" class="context-menu" style="display:none;">
+        <ul>
+            <li data-action="edit-category">编辑分类</li>
+            <li data-action="delete-category">删除分类</li>
         </ul>
     </div>
     <!-- 编辑/新增 浮动弹窗 -->
@@ -166,8 +179,10 @@
     <div id="add-category-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
-            <h3>添加分类</h3>
+            <h3 id="category-modal-title">添加分类</h3>
             <form id="addCategoryForm">
+                <input type="hidden" name="mode" value="add">
+                <input type="hidden" name="old_category" value="">
                 <label>
                     分类名称
                     <input type="text" name="category_name" required placeholder="请输入分类名称">

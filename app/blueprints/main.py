@@ -83,6 +83,10 @@ def handle_config_post():
         return handle_add_item()
     elif action == "add_category":
         return handle_add_category()
+    elif action == "edit_category":
+        return handle_edit_category()
+    elif action == "delete_category":
+        return handle_delete_category()
     elif action == "edit":
         return handle_edit_item()
     elif action == "delete":
@@ -107,6 +111,46 @@ def handle_add_category():
     db_service.get_or_create_category(category_name.strip())
 
     return jsonify({"success": True, "message": "分类已添加"})
+
+
+def handle_edit_category():
+    old_category = request.form.get("old_category")
+    new_category = request.form.get("new_category")
+
+    if not old_category or not old_category.strip():
+        return jsonify({"error": "原分类名称不能为空"}), 400
+    if not new_category or not new_category.strip():
+        return jsonify({"error": "新分类名称不能为空"}), 400
+
+    if old_category.strip() == new_category.strip():
+        return jsonify({"success": True, "message": "分类名称未变更"})
+
+    old_category_obj = db_service.get_category_by_name(old_category.strip())
+    if not old_category_obj:
+        return jsonify({"error": "原分类不存在"}), 400
+
+    new_category_obj = db_service.get_category_by_name(new_category.strip())
+    if new_category_obj:
+        return jsonify({"error": "分类名称已存在"}), 400
+
+    db_service.update_category_name(old_category.strip(), new_category.strip())
+
+    return jsonify({"success": True, "message": "分类已更新"})
+
+
+def handle_delete_category():
+    category_name = request.form.get("category")
+
+    if not category_name or not category_name.strip():
+        return jsonify({"error": "分类名称不能为空"}), 400
+
+    category = db_service.get_category_by_name(category_name.strip())
+    if not category:
+        return jsonify({"error": "分类不存在"}), 400
+
+    db_service.delete_category(category_name.strip())
+
+    return jsonify({"success": True, "message": "分类已删除"})
 
 
 def handle_add_item():

@@ -74,6 +74,30 @@ class DbService:
                 "display_order": 0,
             }
 
+    def update_category_name(self, old_name: str, new_name: str) -> bool:
+        """更新分类名称"""
+        category = self.get_category_by_name(old_name)
+        if not category:
+            return False
+
+        with self.db.get_cursor() as cursor:
+            cursor.execute(
+                "UPDATE categories SET name = ? WHERE id = ?",
+                (new_name, category["id"]),
+            )
+            return cursor.rowcount > 0
+
+    def delete_category(self, name: str) -> bool:
+        """删除分类（同时删除该分类下的所有项目）"""
+        category = self.get_category_by_name(name)
+        if not category:
+            return False
+
+        with self.db.get_cursor() as cursor:
+            cursor.execute("DELETE FROM items WHERE category_id = ?", (category["id"],))
+            cursor.execute("DELETE FROM categories WHERE id = ?", (category["id"],))
+            return True
+
     def find_item(self, category_id: int, title: str) -> Optional[Dict[str, Any]]:
         """在分类中查找项目"""
         with self.db.get_cursor() as cursor:
