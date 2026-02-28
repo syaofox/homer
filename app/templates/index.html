@@ -70,9 +70,6 @@
             {% for category in categories %}
             <div class="category-header" data-category="{{ category.name }}">
                 <h2>{{ category.name }}</h2>
-                <button class="add-category-btn" title="新增分类">
-                    <span class="nav-item-icon">{{ icon_to_svg('fas fa-plus')|safe }}</span>
-                </button>
             </div>
             <div class="nav-grid">
                 {% for item in category.nav_items %}
@@ -113,6 +110,7 @@
     <!-- Context menu for categories -->
     <div id="category-context-menu" class="context-menu" style="display:none;">
         <ul>
+            <li data-action="add-category">新增分类</li>
             <li data-action="edit-category">编辑分类</li>
             <li data-action="delete-category">删除分类</li>
         </ul>

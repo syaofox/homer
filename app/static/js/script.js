@@ -669,15 +669,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 每个分类标题后的添加分类按钮
-    document.addEventListener('click', function(e) {
-        var addCatBtn = e.target.closest('.add-category-btn');
-        if (!addCatBtn) return;
-        var header = addCatBtn.closest('.category-header');
-        var categoryName = header ? header.dataset.category : '';
-        openAddCategoryModal('add', categoryName);
-    });
-
     // 右键菜单 for items
     var contextMenu = document.getElementById('context-menu');
     var categoryContextMenu = document.getElementById('category-context-menu');
@@ -791,7 +782,9 @@ document.addEventListener('DOMContentLoaded', function() {
             var action = li.dataset.action;
             var categoryName = categoryContextTarget.dataset.category || '';
             
-            if (action === 'edit-category') {
+            if (action === 'add-category') {
+                openAddCategoryModal('add', '');
+            } else if (action === 'edit-category') {
                 openAddCategoryModal('edit', categoryName);
             } else if (action === 'delete-category') {
                 if (!confirm('确定删除分类"' + categoryName + '"吗？该分类下的所有项目也会被删除。')) {

@@ -464,26 +464,6 @@ form input, form select, form button {
 .category-header h2 {
     margin: 0;
     padding: 0;
+    border-bottom: none;
 }
 
-.add-category-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 8px;
-    margin-left: 8px;
-    color: #666;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.add-category-btn:hover {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
-.add-category-btn .nav-item-icon {
-    font-size: 16px;
-}
