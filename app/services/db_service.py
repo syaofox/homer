@@ -98,6 +98,19 @@ class DbService:
             cursor.execute("DELETE FROM categories WHERE id = ?", (category["id"],))
             return True
 
+    def reorder_categories(self, order: List[str]) -> bool:
+        """重新排序分类"""
+        if not order:
+            return False
+
+        with self.db.get_cursor() as cursor:
+            for i, name in enumerate(order):
+                cursor.execute(
+                    "UPDATE categories SET display_order = ? WHERE name = ?",
+                    (i, name),
+                )
+            return True
+
     def find_item(self, category_id: int, title: str) -> Optional[Dict[str, Any]]:
         """在分类中查找项目"""
         with self.db.get_cursor() as cursor:

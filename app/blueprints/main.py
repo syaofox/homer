@@ -93,6 +93,8 @@ def handle_config_post():
         return handle_delete_item()
     elif action == "reorder":
         return handle_reorder_items()
+    elif action == "reorder_categories":
+        return handle_reorder_categories()
     elif action in ["move_up", "move_down"]:
         return handle_move_item()
     else:
@@ -272,6 +274,23 @@ def handle_reorder_items():
 
     db_service.reorder_items(category_name, order_list)
     return jsonify({"success": True, "message": "项目顺序已更新"})
+
+
+def handle_reorder_categories():
+    order = request.form.getlist("order[]") or request.form.get("order")
+
+    if isinstance(order, str):
+        order_list = [t.strip() for t in order.split(",") if t.strip()]
+    elif isinstance(order, list):
+        order_list = [t.strip() for t in order if t.strip()]
+    else:
+        order_list = []
+
+    if not order_list:
+        return jsonify({"error": "排序列表不能为空"}), 400
+
+    db_service.reorder_categories(order_list)
+    return jsonify({"success": True, "message": "分类顺序已更新"})
 
 
 def handle_move_item():

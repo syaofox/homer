@@ -821,6 +821,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // 动态加载 SortableJS
     var initSortable = function() {
         loadSortable().then(function(Sortable) {
+            // 分类拖拽排序
+            var originalContent = document.getElementById('original-content');
+            if (originalContent) {
+                new Sortable(originalContent, {
+                    animation: 150,
+                    delay: 150,
+                    delayOnTouchOnly: true,
+                    ghostClass: 'drag-ghost',
+                    chosenClass: 'drag-chosen',
+                    dragClass: 'drag-dragging',
+                    handle: '.category-header',
+                    onEnd: function(evt) {
+                        var containers = originalContent.querySelectorAll('.category-container');
+                        var order = [];
+                        for (var i = 0; i < containers.length; i++) {
+                            var name = containers[i].dataset.category;
+                            if (name) order.push(name);
+                        }
+                        if (order.length) {
+                            var fd = new FormData();
+                            fd.append('action', 'reorder_categories');
+                            order.forEach(function(o) { fd.append('order[]', o); });
+                            fetch('/config', { method: 'POST', body: fd }).catch(function(err) { console.warn('分类排序保存失败:', err); });
+                        }
+                    }
+                });
+            }
+
+            // 项目拖拽排序
             document.querySelectorAll('.nav-grid').forEach(function(grid) {
                 new Sortable(grid, {
                     animation: 150,
