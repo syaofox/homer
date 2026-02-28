@@ -298,30 +298,7 @@ class DbService:
             return [dict(row) for row in cursor.fetchall()]
 
     def sync_frequent_category(self) -> None:
-        """同步常用分类：根据访问次数自动更新常用分类"""
-        frequent = self.get_frequent_items(self.FREQUENT_ITEMS_LIMIT)
-
-        frequent_cat = self.get_or_create_category(self.FREQUENT_CATEGORY_NAME)
-
-        with self.db.get_cursor() as cursor:
-            cursor.execute(
-                "DELETE FROM items WHERE category_id = ?",
-                (frequent_cat["id"],),
-            )
-
-            for item in frequent:
-                cursor.execute(
-                    """INSERT INTO items (category_id, title, url, icon, visit_count, last_visit)
-                       VALUES (?, ?, ?, ?, ?, ?)""",
-                    (
-                        frequent_cat["id"],
-                        item["title"],
-                        item["url"],
-                        item["icon"],
-                        item["visit_count"],
-                        item["last_visit"],
-                    ),
-                )
+        """同步常用分类：现在只从 items 表按访问次数查询，不再在数据库中创建常用分类"""
 
     def get_visit_stats(self) -> Dict[str, Any]:
         """获取访问统计"""
