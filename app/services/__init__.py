@@ -1,4 +1,3 @@
-from .config_service import config_service
-from .stats_service import stats_service
+from .db_service import db_service
 
-__all__ = ["config_service", "stats_service"]
+__all__ = ["db_service"]

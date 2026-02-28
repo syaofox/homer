@@ -601,6 +601,48 @@ document.addEventListener('DOMContentLoaded', function() {
     var contextMenu = document.getElementById('context-menu');
     var contextTarget = null;
 
+    // 添加第一个分类按钮
+    var addFirstCategoryBtn = document.getElementById('add-first-category');
+    if (addFirstCategoryBtn) {
+        addFirstCategoryBtn.addEventListener('click', function() {
+            var modal = document.getElementById('add-category-modal');
+            if (modal) modal.style.display = '';
+            var input = modal ? modal.querySelector('input[name="category_name"]') : null;
+            if (input) setTimeout(function() { input.focus(); }, 0);
+        });
+    }
+
+    // 添加分类弹窗的关闭和提交逻辑
+    var addCategoryModal = document.getElementById('add-category-modal');
+    if (addCategoryModal) {
+        var addCategoryForm = addCategoryModal.querySelector('form');
+        var addCatCloseBtns = addCategoryModal.querySelectorAll('.modal-close, .modal-cancel');
+        var addCatEscHandler = function(e) { if (e.key === 'Escape') addCategoryModal.style.display = 'none'; };
+        
+        addCatCloseBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() { addCategoryModal.style.display = 'none'; });
+        });
+        document.addEventListener('keydown', addCatEscHandler);
+
+        if (addCategoryForm) {
+            addCategoryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var input = addCategoryForm.querySelector('input[name="category_name"]');
+                var categoryName = input ? input.value.trim() : '';
+                if (!categoryName) return;
+
+                var formData = new FormData();
+                formData.append('action', 'add_category');
+                formData.append('category', categoryName);
+
+                fetch('/config', { method: 'POST', body: formData })
+                    .then(function() { return fetch('/'); })
+                    .then(function() { window.location.reload(); })
+                    .catch(function(err) { console.warn('添加分类失败:', err); });
+            });
+        }
+    }
+
     document.addEventListener('contextmenu', function(e) {
         var target = e.target.closest('.nav-item:not(.add-item)');
         if (!target) return;
