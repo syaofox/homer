@@ -435,7 +435,8 @@ function openEditModal(initial, targetItem, gridForAdd) {
             method: 'POST',
             body: formData
         })
-            .then(function() {
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
                 if (mode === 'add') {
                     var newItem = document.createElement('a');
                     newItem.href = newUrl;
@@ -450,18 +451,19 @@ function openEditModal(initial, targetItem, gridForAdd) {
                         img.src = '/config/' + iconSelectValue;
                         newItem.appendChild(img);
                         newItem.setAttribute('data-icon', iconSelectValue);
-                    } else if (iconFile) {
+                    } else if (iconFile && data.icon_path) {
                         var img = document.createElement('img');
                         img.className = 'icon-img';
                         img.alt = newTitle;
-                        img.src = URL.createObjectURL(iconFile);
+                        img.src = '/config/' + data.icon_path;
                         newItem.appendChild(img);
+                        newItem.setAttribute('data-icon', data.icon_path);
                     } else {
                         var span = document.createElement('span');
                         span.className = 'nav-item-icon';
-                        span.innerHTML = iconToSvgHtml('fas fa-link');
+                        span.innerHTML = iconToSvgHtml(data.icon_path || 'fas fa-link');
                         newItem.appendChild(span);
-                        newItem.setAttribute('data-icon', 'fas fa-link');
+                        newItem.setAttribute('data-icon', data.icon_path || 'fas fa-link');
                     }
 
                     var textSpan = document.createElement('span');
@@ -499,10 +501,10 @@ function openEditModal(initial, targetItem, gridForAdd) {
                     var textSpanEl = targetItem.querySelector('span:not(.nav-item-icon)');
                     if (textSpanEl) textSpanEl.textContent = newTitle;
 
-                    if (iconFile) {
+                    if (iconFile && data.icon_path) {
                         var iconImg = targetItem.querySelector('img.icon-img');
                         var existingIcon = targetItem.querySelector('.nav-item-icon');
-                        var newIconSrc = URL.createObjectURL(iconFile);
+                        var newIconSrc = '/config/' + data.icon_path;
                         if (iconImg) {
                             iconImg.src = newIconSrc;
                         } else if (existingIcon) {
@@ -512,7 +514,7 @@ function openEditModal(initial, targetItem, gridForAdd) {
                             newImg.src = newIconSrc;
                             existingIcon.replaceWith(newImg);
                         }
-                        targetItem.setAttribute('data-icon', '');
+                        targetItem.setAttribute('data-icon', data.icon_path);
                     } else if (iconSelectValue) {
                         var existingImg2 = targetItem.querySelector('img.icon-img');
                         var existingIcon2 = targetItem.querySelector('.nav-item-icon');

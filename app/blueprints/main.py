@@ -179,7 +179,7 @@ def handle_add_item():
 
     new_item = db_service.add_item(category, title, url, icon_path)
 
-    return jsonify({"success": True, "message": "项目已添加"})
+    return jsonify({"success": True, "message": "项目已添加", "icon_path": icon_path})
 
 
 def handle_edit_item():
@@ -228,7 +228,14 @@ def handle_edit_item():
             new_category, new_title, new_url, icon_path or "fas fa-link"
         )
 
-    return jsonify({"success": True, "message": "项目已更新"})
+    return jsonify(
+        {
+            "success": True,
+            "message": "项目已更新",
+            "icon_path": icon_path
+            or (original_item.get("icon") if original_item else "fas fa-link"),
+        }
+    )
 
 
 def handle_delete_item():
