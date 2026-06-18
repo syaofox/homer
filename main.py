@@ -1,8 +1,10 @@
+from flask import Flask
+
 from app import app
 from app.config import config as app_config
 
 
-def create_app():
+def create_app() -> Flask:
     """用于生产环境的应用工厂函数"""
     return app
 

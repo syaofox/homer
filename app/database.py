@@ -1,9 +1,8 @@
-import sqlite3
-import aiosqlite
 import logging
-from pathlib import Path
-from typing import Optional, List, Dict, Any
+import sqlite3
 from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, Optional
 
 from app.config import config as app_config
 
@@ -11,23 +10,21 @@ logger = logging.getLogger(__name__)
 
 
 class Database:
-    """SQLite 数据库管理类"""
+    """SQLite 数据库管理类 - 管理数据库连接和表结构"""
 
     _instance: Optional["Database"] = None
+    _connection: sqlite3.Connection | None = None
 
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str) -> None:
         self.db_path = db_path
         self._ensure_db_dir()
 
     def _ensure_db_dir(self) -> None:
-        """确保数据库目录存在"""
         db_dir = Path(self.db_path).parent
-        if not db_dir.exists():
-            db_dir.mkdir(parents=True, exist_ok=True)
+        db_dir.mkdir(parents=True, exist_ok=True)
 
     @classmethod
-    def get_instance(cls, db_path: Optional[str] = None) -> "Database":
-        """获取数据库单例"""
+    def get_instance(cls, db_path: str | None = None) -> "Database":
         if cls._instance is None:
             if db_path is None:
                 db_path = app_config.db_path
@@ -36,19 +33,20 @@ class Database:
 
     @property
     def connection(self) -> sqlite3.Connection:
-        """获取同步连接（用于需要线程安全的场景）"""
-        conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        return conn
+        """获取数据库连接（懒加载，单例级别复用）"""
+        if self._connection is None:
+            self._connection = sqlite3.connect(self.db_path, check_same_thread=False)
+            self._connection.row_factory = sqlite3.Row
+        return self._connection
 
-    async def async_connection(self) -> aiosqlite.Connection:
-        """获取异步连接"""
-        conn = await aiosqlite.connect(self.db_path)
-        conn.row_factory = aiosqlite.Row
-        return conn
+    def close(self) -> None:
+        """关闭数据库连接"""
+        if self._connection is not None:
+            self._connection.close()
+            self._connection = None
 
     @contextmanager
-    def get_cursor(self):
+    def get_cursor(self) -> Any:
         """获取数据库游标的上下文管理器"""
         conn = self.connection
         cursor = conn.cursor()
@@ -89,17 +87,17 @@ class Database:
             """)
 
             cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_items_category 
+                CREATE INDEX IF NOT EXISTS idx_items_category
                 ON items(category_id)
             """)
 
             cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_items_visit_count 
+                CREATE INDEX IF NOT EXISTS idx_items_visit_count
                 ON items(visit_count DESC)
             """)
 
             cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_items_url 
+                CREATE INDEX IF NOT EXISTS idx_items_url
                 ON items(url)
             """)
 

@@ -1,6 +1,5 @@
 import os
-import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 
@@ -77,34 +76,34 @@ def validate_image_filename(filename: str) -> bool:
 
 
 def validate_form_data(
-    data: Dict[str, Any], required_fields: List[str]
-) -> Dict[str, Any]:
+    data: dict[str, Any], required_fields: list[str]
+) -> dict[str, Any]:
     """验证表单数据"""
-    errors = {}
+    errors: dict[str, str] = {}
     for field in required_fields:
         if field not in data or not data[field]:
             errors[field] = f"字段 '{field}' 是必需的"
 
     if "title" in data and data["title"]:
-        if not validate_title(data["title"]):
+        if not validate_title(str(data["title"])):
             errors["title"] = "标题格式无效"
 
     if "url" in data and data["url"]:
-        if not validate_url(data["url"]):
+        if not validate_url(str(data["url"])):
             errors["url"] = "URL格式无效"
 
     if "category" in data and data["category"]:
-        if not validate_category_name(data["category"]):
+        if not validate_category_name(str(data["category"])):
             errors["category"] = "分类名称格式无效"
 
     if "new_category" in data and data["new_category"]:
-        if not validate_category_name(data["new_category"]):
+        if not validate_category_name(str(data["new_category"])):
             errors["new_category"] = "新分类名称格式无效"
 
     return {"valid": len(errors) == 0, "errors": errors}
 
 
-def format_error_message(errors: Dict[str, str]) -> str:
+def format_error_message(errors: dict[str, str]) -> str:
     """格式化错误消息"""
     if not errors:
         return ""

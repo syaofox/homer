@@ -1,22 +1,21 @@
-import os
 import logging
+import os
+from collections.abc import Callable
 from functools import wraps
+from typing import Any
 
-from flask import Blueprint, render_template, request, jsonify, send_from_directory
+from flask import Blueprint, jsonify, render_template, request
 from pypinyin import lazy_pinyin
 from werkzeug.utils import secure_filename
 
 from app.config import config as app_config
-from app.services import db_service
 from app.core.validators import (
-    validate_form_data,
-    validate_title,
-    validate_url,
-    validate_category_name,
-    sanitize_filename,
     format_error_message,
+    sanitize_filename,
+    validate_form_data,
 )
-from app.utils import icon_to_svg, is_fa_icon, get_version
+from app.services import db_service
+from app.utils import get_version
 
 logger = logging.getLogger(__name__)
 
@@ -25,15 +24,18 @@ main_bp = Blueprint("main", __name__)
 CONFIG_IMG_PATH = app_config.images_path
 
 
-def error_handler(f):
+def error_handler(f: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated_function(*args: Any, **kwargs: Any) -> Any:
         try:
             return f(*args, **kwargs)
         except FileNotFoundError as e:
             logger.error(f"文件未找到: {e}")
             return jsonify({"error": "配置文件未找到"}), 404
         except Exception as e:
+            from werkzeug.exceptions import HTTPException
+            if isinstance(e, HTTPException):
+                return jsonify({"error": e.description}), e.code
             logger.error(f"未知错误: {e}")
             return jsonify({"error": "服务器内部错误"}), 500
 
@@ -42,7 +44,7 @@ def error_handler(f):
 
 @main_bp.route("/")
 @error_handler
-def index():
+def index() -> str:
     categories = db_service.get_categories()
     categories_data = [
         {"name": category["name"], "nav_items": category["items"]}
@@ -51,7 +53,7 @@ def index():
 
     frequent_items = db_service.get_frequent_items(20)
 
-    icon_files = []
+    icon_files: list[str] = []
     if os.path.exists(CONFIG_IMG_PATH):
         icon_files = sorted(
             [
@@ -72,11 +74,11 @@ def index():
 
 @main_bp.route("/config", methods=["POST"])
 @error_handler
-def config():
+def config() -> Any:
     return handle_config_post()
 
 
-def handle_config_post():
+def handle_config_post() -> Any:
     action = request.form.get("action")
 
     if action == "add":
@@ -101,7 +103,7 @@ def handle_config_post():
         return jsonify({"error": "未知操作"}), 400
 
 
-def handle_add_category():
+def handle_add_category() -> Any:
     validation = validate_form_data(request.form, ["category"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
@@ -115,7 +117,7 @@ def handle_add_category():
     return jsonify({"success": True, "message": "分类已添加"})
 
 
-def handle_edit_category():
+def handle_edit_category() -> Any:
     old_category = request.form.get("old_category")
     new_category = request.form.get("new_category")
 
@@ -140,7 +142,7 @@ def handle_edit_category():
     return jsonify({"success": True, "message": "分类已更新"})
 
 
-def handle_delete_category():
+def handle_delete_category() -> Any:
     category_name = request.form.get("category")
 
     if not category_name or not category_name.strip():
@@ -155,19 +157,19 @@ def handle_delete_category():
     return jsonify({"success": True, "message": "分类已删除"})
 
 
-def handle_add_item():
+def handle_add_item() -> Any:
     validation = validate_form_data(request.form, ["category", "title", "url"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
 
-    category = request.form.get("category")
-    title = request.form.get("title")
-    url = request.form.get("url")
+    category = request.form.get("category", "")
+    title = request.form.get("title", "")
+    url = request.form.get("url", "")
     icon = request.files.get("icon")
     icon_path_param = request.form.get("icon_path")
 
     if icon_path_param:
-        icon_path = icon_path_param
+        icon_path: str = icon_path_param
     elif icon and icon.filename:
         filename = sanitize_filename(secure_filename(icon.filename))
         if not filename:
@@ -177,12 +179,12 @@ def handle_add_item():
     else:
         icon_path = "fas fa-link"
 
-    new_item = db_service.add_item(category, title, url, icon_path)
+    db_service.add_item(category, title, url, icon_path)
 
     return jsonify({"success": True, "message": "项目已添加", "icon_path": icon_path})
 
 
-def handle_edit_item():
+def handle_edit_item() -> Any:
     validation = validate_form_data(
         request.form,
         ["old_category", "old_title", "new_category", "new_title", "new_url"],
@@ -190,11 +192,11 @@ def handle_edit_item():
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
 
-    old_category = request.form.get("old_category")
-    new_category = request.form.get("new_category")
-    old_title = request.form.get("old_title")
-    new_title = request.form.get("new_title")
-    new_url = request.form.get("new_url").strip()
+    old_category = request.form.get("old_category", "")
+    new_category = request.form.get("new_category", "")
+    old_title = request.form.get("old_title", "")
+    new_title = request.form.get("new_title", "")
+    new_url = request.form.get("new_url", "").strip()
     new_icon = request.files.get("new_icon")
     new_icon_path_param = request.form.get("new_icon_path")
     old_url = request.form.get("old_url", "").strip()
@@ -202,7 +204,7 @@ def handle_edit_item():
     if old_category == db_service.FREQUENT_CATEGORY_NAME:
         return jsonify({"error": "常用项目不支持编辑，仅支持删除"}), 400
 
-    icon_path = None
+    icon_path: str | None = None
     if new_icon_path_param:
         icon_path = new_icon_path_param
     elif new_icon and new_icon.filename:
@@ -212,6 +214,9 @@ def handle_edit_item():
             icon_path = f"img/{filename}"
 
     original_item = db_service.find_item_by_url(old_url) if old_url else None
+    final_icon = icon_path
+    if not final_icon:
+        final_icon = str(original_item.get("icon")) if original_item else "fas fa-link"
 
     if old_category == new_category:
         db_service.update_item(
@@ -219,27 +224,29 @@ def handle_edit_item():
             old_title,
             new_title,
             new_url,
-            icon_path
-            or (original_item.get("icon") if original_item else "fas fa-link"),
+            final_icon,
         )
     else:
-        db_service.delete_item(old_category, old_title)
-        db_service.add_item(
-            new_category, new_title, new_url, icon_path or "fas fa-link"
+        db_service.move_item_between_categories(old_category, new_category, old_title)
+        db_service.update_item(
+            new_category,
+            old_title,
+            new_title,
+            new_url,
+            final_icon,
         )
 
     return jsonify(
         {
             "success": True,
             "message": "项目已更新",
-            "icon_path": icon_path
-            or (original_item.get("icon") if original_item else "fas fa-link"),
+            "icon_path": final_icon,
         }
     )
 
 
-def handle_delete_item():
-    category_name = request.form.get("category")
+def handle_delete_item() -> Any:
+    category_name = request.form.get("category", "")
     if not category_name:
         return jsonify({"error": "分类名称是必需的"}), 400
 
@@ -255,19 +262,19 @@ def handle_delete_item():
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
 
-    title = request.form.get("title")
+    title = request.form.get("title", "")
 
     db_service.delete_item(category_name, title)
 
     return jsonify({"success": True, "message": "项目已删除"})
 
 
-def handle_reorder_items():
-    category_name = request.form.get("category")
+def handle_reorder_items() -> Any:
+    category_name = request.form.get("category", "")
     if not category_name:
         return jsonify({"error": "分类名称是必需的"}), 400
 
-    order = request.form.getlist("order[]") or request.form.get("order")
+    order = request.form.getlist("order[]") or request.form.get("order", "")
 
     if isinstance(order, str):
         order_list = [t.strip() for t in order.split(",") if t.strip()]
@@ -283,7 +290,7 @@ def handle_reorder_items():
     return jsonify({"success": True, "message": "项目顺序已更新"})
 
 
-def handle_reorder_categories():
+def handle_reorder_categories() -> Any:
     order = request.form.getlist("order[]") or request.form.get("order")
 
     if isinstance(order, str):
@@ -300,14 +307,14 @@ def handle_reorder_categories():
     return jsonify({"success": True, "message": "分类顺序已更新"})
 
 
-def handle_move_item():
+def handle_move_item() -> Any:
     validation = validate_form_data(request.form, ["category", "title"])
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
 
-    category_name = request.form.get("category")
-    item_title = request.form.get("title")
-    action = request.form.get("action")
+    category_name = request.form.get("category", "")
+    item_title = request.form.get("title", "")
+    action = request.form.get("action", "")
 
     direction = "up" if action == "move_up" else "down"
     db_service.move_item(category_name, item_title, direction)
@@ -317,7 +324,7 @@ def handle_move_item():
 
 @main_bp.route("/search")
 @error_handler
-def search():
+def search() -> Any:
     search_term = request.args.get("term", "").strip()
     if not search_term:
         return jsonify([])
@@ -326,7 +333,7 @@ def search():
 
     try:
         categories = db_service.get_categories()
-        results = []
+        results: list[dict[str, Any]] = []
 
         for category in categories:
             for item in category.get("items", []):
@@ -350,36 +357,27 @@ def search():
 
 @main_bp.route("/api/visit-stats", methods=["GET"])
 @error_handler
-def get_visit_stats():
-    try:
-        stats = db_service.get_visit_stats()
-        return jsonify(stats)
-    except Exception as e:
-        logger.error(f"获取访问统计失败: {e}")
-        return jsonify({}), 500
+def get_visit_stats() -> Any:
+    stats = db_service.get_visit_stats()
+    return jsonify(stats)
 
 
 @main_bp.route("/api/visit-stats/record", methods=["POST"])
 @error_handler
-def record_visit():
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "无效的请求数据"}), 400
+def record_visit() -> Any:
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "无效的请求数据"}), 400
 
-        url = data.get("url", "").strip()
-        title = data.get("title", "").strip()
-        icon = data.get("icon", "fas fa-link")
+    url = data.get("url", "").strip()
+    title = data.get("title", "").strip()
+    icon = data.get("icon", "fas fa-link")
 
-        if not url or not title:
-            return jsonify({"error": "url和title是必需的"}), 400
+    if not url or not title:
+        return jsonify({"error": "url和title是必需的"}), 400
 
-        updated_stat = db_service.record_visit(url, title, icon)
+    updated_stat = db_service.record_visit(url, title, icon)
 
-        db_service.sync_frequent_category()
+    db_service.sync_frequent_category()
 
-        return jsonify({"success": True, "data": updated_stat})
-
-    except Exception as e:
-        logger.error(f"记录访问失败: {e}")
-        return jsonify({"error": "记录访问失败"}), 500
+    return jsonify({"success": True, "data": updated_stat})

@@ -22,7 +22,7 @@ def get_project_root() -> Path:
     return current_file.parent
 
 
-def migrate(config_path: str, db_path: str, stats_path: str = None):
+def migrate(config_path: str, db_path: str, stats_path: str | None = None) -> bool:
     """执行数据迁移"""
 
     config_file = Path(config_path)
@@ -30,7 +30,7 @@ def migrate(config_path: str, db_path: str, stats_path: str = None):
         print(f"错误: 配置文件不存在: {config_path}")
         return False
 
-    with open(config_file, "r", encoding="utf-8") as f:
+    with open(config_file, encoding="utf-8") as f:
         config_data = json.load(f)
 
     db_file = Path(db_path)
@@ -95,9 +95,8 @@ def migrate(config_path: str, db_path: str, stats_path: str = None):
             url = item.get("url", "")
             icon = item.get("icon", "fas fa-link")
 
-            cursor.execute(
-                """INSERT INTO items (category_id, title, url, icon, display_order, visit_count, last_visit)
-                   VALUES (?, ?, ?, ?, ?, 0, NULL)""",
+            sql = "INSERT INTO items (category_id, title, url, icon, display_order, visit_count, last_visit) VALUES (?, ?, ?, ?, ?, 0, NULL)"  # noqa: E501
+            cursor.execute(sql,
                 (category_id, title, url, icon, j),
             )
 
@@ -106,10 +105,10 @@ def migrate(config_path: str, db_path: str, stats_path: str = None):
     if stats_path:
         stats_file = Path(stats_path)
         if stats_file.exists():
-            with open(stats_file, "r", encoding="utf-8") as f:
+            with open(stats_file, encoding="utf-8") as f:
                 stats_data = json.load(f)
 
-            print(f"迁移访问统计数据...")
+            print("迁移访问统计数据...")
 
             for url, stat in stats_data.items():
                 title = stat.get("title", "")
@@ -134,7 +133,7 @@ def migrate(config_path: str, db_path: str, stats_path: str = None):
     cursor.execute("SELECT COUNT(*) FROM items")
     item_count = cursor.fetchone()[0]
 
-    print(f"\n迁移完成!")
+    print("\n迁移完成!")
     print(f"  - 分类: {cat_count}")
     print(f"  - 项目: {item_count}")
     print(f"  - 数据库: {db_path}")
@@ -143,7 +142,7 @@ def migrate(config_path: str, db_path: str, stats_path: str = None):
     return True
 
 
-def main():
+def main() -> None:
     project_root = get_project_root()
 
     config_path = project_root / "config" / "config.json"
@@ -159,7 +158,7 @@ def main():
     print("-" * 50)
 
     if not config_path.exists():
-        print(f"错误: 配置文件不存在!")
+        print("错误: 配置文件不存在!")
         print(f"\n请确保 {config_path} 存在，或手动创建空配置:")
         print("  echo '{\"categories\": []}' > config/config.json")
         sys.exit(1)
