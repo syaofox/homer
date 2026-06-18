@@ -22,32 +22,32 @@ class DbService:
         return get_db()
 
     def get_categories(self, include_items: bool = True) -> list[dict[str, Any]]:
-        """获取所有分类"""
+        """获取所有分类（使用单次 JOIN 避免 N+1 查询）"""
         with self.db.get_cursor() as cursor:
             cursor.execute(
                 "SELECT id, name, icon, display_order FROM categories ORDER BY display_order, id"
             )
             categories = [dict(row) for row in cursor.fetchall()]
 
-            if include_items:
+            if include_items and categories:
+                placeholders = ",".join("?" for _ in categories)
+                cursor.execute(
+                    f"""SELECT id, category_id, title, url, icon, display_order,
+                               visit_count, last_visit
+                       FROM items
+                       WHERE category_id IN ({placeholders})
+                       ORDER BY display_order, id""",
+                    tuple(c["id"] for c in categories),
+                )
+                items_by_category: dict[int, list[dict[str, Any]]] = {}
+                for row in cursor.fetchall():
+                    item = dict(row)
+                    cat_id = item.pop("category_id")
+                    items_by_category.setdefault(cat_id, []).append(item)
                 for category in categories:
-                    category["items"] = self._get_items_by_category(
-                        cursor, category["id"]
-                    )
+                    category["items"] = items_by_category.get(category["id"], [])
 
             return categories
-
-    def _get_items_by_category(self, cursor: Any, category_id: int) -> list[dict[str, Any]]:
-        """获取指定分类的所有项目"""
-        cursor.execute(
-            """SELECT id, category_id, title, url, icon, display_order,
-                      visit_count, last_visit
-               FROM items
-               WHERE category_id = ?
-               ORDER BY display_order, id""",
-            (category_id,),
-        )
-        return [dict(row) for row in cursor.fetchall()]
 
     def get_category_by_name(self, name: str) -> dict[str, Any] | None:
         """根据名称查找分类"""
@@ -217,42 +217,43 @@ class DbService:
                 return False
 
             current_order = item["display_order"]
+            current_id = item["id"]
 
             if direction == "up":
-                target_order = current_order - 1
-                # 找到上一个 display_order 的相邻项目
                 cursor.execute(
                     """SELECT id, display_order FROM items
-                       WHERE category_id = ? AND display_order < ?
-                       ORDER BY display_order DESC LIMIT 1""",
-                    (category["id"], current_order),
+                       WHERE category_id = ?
+                         AND (display_order < ? OR (display_order = ? AND id < ?))
+                       ORDER BY display_order DESC, id DESC LIMIT 1""",
+                    (category["id"], current_order, current_order, current_id),
                 )
             else:
-                target_order = current_order + 1
                 cursor.execute(
                     """SELECT id, display_order FROM items
-                       WHERE category_id = ? AND display_order > ?
-                       ORDER BY display_order ASC LIMIT 1""",
-                    (category["id"], current_order),
+                       WHERE category_id = ?
+                         AND (display_order > ? OR (display_order = ? AND id > ?))
+                       ORDER BY display_order ASC, id ASC LIMIT 1""",
+                    (category["id"], current_order, current_order, current_id),
                 )
 
             neighbor = cursor.fetchone()
             if neighbor:
-                # 交换 display_order
-                cursor.execute(
-                    "UPDATE items SET display_order = ? WHERE id = ?",
-                    (neighbor["display_order"], item["id"]),
-                )
-                cursor.execute(
-                    "UPDATE items SET display_order = ? WHERE id = ?",
-                    (current_order, neighbor["id"]),
-                )
-            else:
-                # 没有相邻项目（已经在边界），直接设置
-                cursor.execute(
-                    "UPDATE items SET display_order = ? WHERE id = ?",
-                    (target_order, item["id"]),
-                )
+                neighbor_order = neighbor["display_order"]
+                if neighbor_order == current_order:
+                    new_order = current_order - 1 if direction == "up" else current_order + 1
+                    cursor.execute(
+                        "UPDATE items SET display_order = ? WHERE id = ?",
+                        (new_order, item["id"]),
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE items SET display_order = ? WHERE id = ?",
+                        (neighbor_order, item["id"]),
+                    )
+                    cursor.execute(
+                        "UPDATE items SET display_order = ? WHERE id = ?",
+                        (current_order, neighbor["id"]),
+                    )
             return True
 
     def reorder_items(self, category_name: str, order: list[str]) -> bool:
@@ -342,9 +343,6 @@ class DbService:
             )
             return [dict(row) for row in cursor.fetchall()]
 
-    def sync_frequent_category(self) -> None:
-        """同步常用分类：现在只从 items 表按访问次数查询，不再在数据库中创建常用分类"""
-
     def get_visit_stats(self) -> dict[str, Any]:
         """获取访问统计"""
         with self.db.get_cursor() as cursor:
@@ -359,8 +357,8 @@ class DbService:
                 stats[row["url"]] = dict(row)
             return stats
 
-    def remove_stat_by_url(self, url: str) -> bool:
-        """删除指定 URL 的项目（清理统计和项目本身）"""
+    def delete_item_by_url(self, url: str) -> bool:
+        """根据 URL 删除项目"""
         with self.db.get_cursor() as cursor:
             cursor.execute("DELETE FROM items WHERE url = ?", (url,))
             return bool(cursor.rowcount > 0)

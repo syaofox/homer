@@ -22,8 +22,7 @@ def temp_db() -> Generator[Path]:
     db_path = tmpdir / "test_homer.db"
 
     # 重置单例，确保测试使用临时数据库
-    Database._instance = None
-    Database._connection = None
+    Database.reset_instance()
 
     # 保存原 db_path，设置测试路径
     from app.config import config
@@ -37,10 +36,7 @@ def temp_db() -> Generator[Path]:
 
     # 清理
     config.db_file = orig_db_path
-    Database._instance = None
-    if Database._connection is not None:
-        Database._connection.close()
-        Database._connection = None
+    Database.reset_instance()
 
 
 @pytest.fixture

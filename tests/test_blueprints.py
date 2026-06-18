@@ -96,6 +96,38 @@ class TestConfigRoute:
         })
         assert resp.status_code == 400
 
+    def test_add_item_invalid_icon_path(self, client: FlaskClient) -> None:
+        resp = client.post("/config", data={
+            "action": "add",
+            "category": "测试分类",
+            "title": "项目",
+            "url": "https://example.com",
+            "icon_path": "../../etc/passwd",
+        })
+        assert resp.status_code == 400
+        assert "无效的图标路径" in resp.get_json()["error"]
+
+    def test_edit_item_to_nonexistent_category(self, client: FlaskClient) -> None:
+        client.post("/config", data={"action": "add_category", "category": "来源分类"})
+        client.post("/config", data={
+            "action": "add",
+            "category": "来源分类",
+            "title": "项目",
+            "url": "https://example.com",
+        })
+        resp = client.post("/config", data={
+            "action": "edit",
+            "old_category": "来源分类",
+            "new_category": "不存在的分类",
+            "old_title": "项目",
+            "new_title": "新标题",
+            "new_url": "https://new.com",
+            "old_url": "https://example.com",
+        })
+        assert resp.status_code == 400
+        data = resp.get_json()
+        assert data["error"] == "目标分类不存在"
+
     def test_edit_category(self, client: FlaskClient) -> None:
         client.post("/config", data={"action": "add_category", "category": "旧名称"})
         resp = client.post("/config", data={

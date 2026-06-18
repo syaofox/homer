@@ -9,8 +9,6 @@ class TestAppConfig:
     def test_default_environment(self) -> None:
         config = AppConfig()
         assert config.environment in ("docker", "development", "production")
-        # 清理单例副作用
-        config._connection = None  # type: ignore
 
     def test_paths_are_set(self) -> None:
         config = AppConfig()

@@ -2,7 +2,10 @@
 工具函数单元测试
 """
 
+import re
+
 from app.utils import (
+    _ICON_SVG_MAP,
     clean_html_content,
     get_version,
     icon_to_svg,
@@ -165,3 +168,27 @@ class TestTruncateText:
     def test_custom_max_length(self) -> None:
         result = truncate_text("hello world", 5)
         assert result == "he..."
+
+
+class TestIconSvgConsistency:
+    """验证 Python 和 JS 中的 SVG 图标映射一致"""
+
+    JS_PATH = "app/static/js/script.js"
+
+    def test_icon_keys_match_js(self) -> None:
+        with open(self.JS_PATH) as f:
+            js_content = f.read()
+
+        m = re.search(r"var ICON_SVG_MAP\s*=\s*\{(.*?)\};", js_content, re.DOTALL)
+        assert m, "未能在 JS 中找到 ICON_SVG_MAP"
+        map_block = m.group(1)
+        js_keys = set(re.findall(r"(?:'|\b)([\w-]+)(?:'|\s*)\s*:", map_block))
+        py_keys = set(_ICON_SVG_MAP.keys())
+
+        common = js_keys & py_keys
+        only_js = js_keys - py_keys
+        only_py = py_keys - js_keys
+
+        assert common, "Python 与 JS 的 SVG 图标映射没有共同的键"
+        assert not only_js, f"JS 中多出的图标键: {only_js}"
+        assert not only_py, f"Python 中多出的图标键: {only_py}"

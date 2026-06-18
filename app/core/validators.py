@@ -81,23 +81,24 @@ def validate_form_data(
     """验证表单数据"""
     errors: dict[str, str] = {}
     for field in required_fields:
-        if field not in data or not data[field]:
+        value = data.get(field)
+        if value is None or value == "":
             errors[field] = f"字段 '{field}' 是必需的"
 
-    if "title" in data and data["title"]:
-        if not validate_title(str(data["title"])):
+    if isinstance(data.get("title"), str) and data["title"] != "":
+        if not validate_title(data["title"]):
             errors["title"] = "标题格式无效"
 
-    if "url" in data and data["url"]:
-        if not validate_url(str(data["url"])):
+    if isinstance(data.get("url"), str) and data["url"] != "":
+        if not validate_url(data["url"]):
             errors["url"] = "URL格式无效"
 
-    if "category" in data and data["category"]:
-        if not validate_category_name(str(data["category"])):
+    if isinstance(data.get("category"), str) and data["category"] != "":
+        if not validate_category_name(data["category"]):
             errors["category"] = "分类名称格式无效"
 
-    if "new_category" in data and data["new_category"]:
-        if not validate_category_name(str(data["new_category"])):
+    if isinstance(data.get("new_category"), str) and data["new_category"] != "":
+        if not validate_category_name(data["new_category"]):
             errors["new_category"] = "新分类名称格式无效"
 
     return {"valid": len(errors) == 0, "errors": errors}

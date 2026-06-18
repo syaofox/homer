@@ -13,6 +13,7 @@ from app.core.validators import (
     format_error_message,
     sanitize_filename,
     validate_form_data,
+    validate_icon_path,
 )
 from app.services import db_service
 from app.utils import get_version
@@ -108,10 +109,7 @@ def handle_add_category() -> Any:
     if not validation["valid"]:
         return jsonify({"error": format_error_message(validation["errors"])}), 400
 
-    category_name = request.form.get("category")
-    if not category_name or not category_name.strip():
-        return jsonify({"error": "分类名称不能为空"}), 400
-
+    category_name = request.form.get("category", "")
     db_service.get_or_create_category(category_name.strip())
 
     return jsonify({"success": True, "message": "分类已添加"})
@@ -169,12 +167,17 @@ def handle_add_item() -> Any:
     icon_path_param = request.form.get("icon_path")
 
     if icon_path_param:
+        if not validate_icon_path(icon_path_param):
+            return jsonify({"error": "无效的图标路径"}), 400
         icon_path: str = icon_path_param
     elif icon and icon.filename:
         filename = sanitize_filename(secure_filename(icon.filename))
         if not filename:
             return jsonify({"error": "无效的文件名"}), 400
-        icon.save(os.path.join(CONFIG_IMG_PATH, filename))
+        save_path = os.path.join(CONFIG_IMG_PATH, filename)
+        if os.path.exists(save_path):
+            return jsonify({"error": "文件已存在"}), 400
+        icon.save(save_path)
         icon_path = f"img/{filename}"
     else:
         icon_path = "fas fa-link"
@@ -206,11 +209,16 @@ def handle_edit_item() -> Any:
 
     icon_path: str | None = None
     if new_icon_path_param:
+        if not validate_icon_path(new_icon_path_param):
+            return jsonify({"error": "无效的图标路径"}), 400
         icon_path = new_icon_path_param
     elif new_icon and new_icon.filename:
         filename = sanitize_filename(secure_filename(new_icon.filename))
         if filename:
-            new_icon.save(os.path.join(CONFIG_IMG_PATH, filename))
+            save_path = os.path.join(CONFIG_IMG_PATH, filename)
+            if os.path.exists(save_path):
+                return jsonify({"error": "文件已存在"}), 400
+            new_icon.save(save_path)
             icon_path = f"img/{filename}"
 
     original_item = db_service.find_item_by_url(old_url) if old_url else None
@@ -227,7 +235,11 @@ def handle_edit_item() -> Any:
             final_icon,
         )
     else:
-        db_service.move_item_between_categories(old_category, new_category, old_title)
+        new_cat = db_service.get_category_by_name(new_category)
+        if not new_cat:
+            return jsonify({"error": "目标分类不存在"}), 400
+        if not db_service.move_item_between_categories(old_category, new_category, old_title):
+            return jsonify({"error": "移动项目失败"}), 400
         db_service.update_item(
             new_category,
             old_title,
@@ -254,8 +266,7 @@ def handle_delete_item() -> Any:
         url = request.form.get("url", "").strip()
         if not url:
             return jsonify({"error": "常用项目删除需要提供 url"}), 400
-        db_service.remove_stat_by_url(url)
-        db_service.sync_frequent_category()
+        db_service.delete_item_by_url(url)
         return jsonify({"success": True, "message": "项目已删除"})
 
     validation = validate_form_data(request.form, ["category", "title"])
@@ -377,7 +388,5 @@ def record_visit() -> Any:
         return jsonify({"error": "url和title是必需的"}), 400
 
     updated_stat = db_service.record_visit(url, title, icon)
-
-    db_service.sync_frequent_category()
 
     return jsonify({"success": True, "data": updated_stat})

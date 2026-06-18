@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 添加分类弹窗的关闭和提交逻辑
     var addCategoryModal = document.getElementById('add-category-modal');
-    var addCategoryForm = addCategoryForm || null;
+    var addCategoryForm = null;
     var addCatCloseBtns, addCatEscHandler;
     
     function openAddCategoryModal(mode, oldCategoryName) {
@@ -845,7 +845,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             var fd = new FormData();
                             fd.append('action', 'reorder_categories');
                             order.forEach(function(o) { fd.append('order[]', o); });
-                            fetch('/config', { method: 'POST', body: fd }).catch(function(err) { console.warn('分类排序保存失败:', err); });
+                            fetch('/config', { method: 'POST', body: fd })
+                                .then(function(res) {
+                                    if (!res.ok) console.warn('分类排序保存失败:', res.status);
+                                })
+                                .catch(function(err) { console.warn('分类排序保存失败:', err); });
                         }
                     }
                 });
@@ -879,7 +883,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             fd.append('action', 'reorder');
                             fd.append('category', category);
                             order.forEach(function(o) { fd.append('order[]', o); });
-                            fetch('/config', { method: 'POST', body: fd }).catch(function(err) { console.warn('排序保存失败:', err); });
+                            fetch('/config', { method: 'POST', body: fd })
+                                .then(function(res) {
+                                    if (!res.ok) console.warn('排序保存失败:', res.status);
+                                })
+                                .catch(function(err) { console.warn('排序保存失败:', err); });
                         }
                     }
                 });

@@ -221,12 +221,12 @@ class TestVisitStats:
         assert "https://test.com" in stats
         assert stats["https://test.com"]["visit_count"] >= 2
 
-    def test_remove_stat_by_url(self, service: DbService) -> None:
+    def test_delete_item_by_url(self, service: DbService) -> None:
         service.add_item("工作", "Test", "https://test.com")
-        result = service.remove_stat_by_url("https://test.com")
+        result = service.delete_item_by_url("https://test.com")
         assert result is True
         assert service.find_item_by_url("https://test.com") is None
 
-    def test_remove_stat_url_not_found(self, service: DbService) -> None:
-        result = service.remove_stat_by_url("https://notfound.com")
+    def test_delete_item_by_url_not_found(self, service: DbService) -> None:
+        result = service.delete_item_by_url("https://notfound.com")
         assert result is False

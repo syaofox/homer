@@ -39,6 +39,14 @@ class Database:
             self._connection.row_factory = sqlite3.Row
         return self._connection
 
+    @classmethod
+    def reset_instance(cls) -> None:
+        """重置单例（主要用于测试）"""
+        if cls._connection is not None:
+            cls._connection.close()
+        cls._instance = None
+        cls._connection = None
+
     def close(self) -> None:
         """关闭数据库连接"""
         if self._connection is not None:
