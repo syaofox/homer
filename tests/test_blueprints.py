@@ -344,6 +344,19 @@ class TestSearchRoute:
 
         assert data_first == data_second
 
+    def test_search_title_no_html_tags(self, client: FlaskClient) -> None:
+        svc = DbService()
+        svc.get_or_create_category("测试")
+        svc.add_item("测试", "MangaTag", "https://example.com/manga")
+
+        resp = client.get("/search?term=Tag")
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert len(data) >= 1
+        for item in data:
+            assert "<mark>" not in item.get("title", "")
+            assert "</mark>" not in item.get("title", "")
+
 
 class TestVisitStatsRoute:
     def test_get_stats_empty(self, client: FlaskClient) -> None:

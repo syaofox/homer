@@ -296,7 +296,7 @@ function highlightSearchResult(item, searchTerm) {
     var before = title.substring(0, idx);
     var match = title.substring(idx, idx + searchTerm.length);
     var after = title.substring(idx + searchTerm.length);
-    return Object.assign({}, item, { title: before + '<mark>' + match + '</mark>' + after });
+    return Object.assign({}, item, { highlightedTitle: before + '<mark>' + match + '</mark>' + after });
 }
 
 function displaySearchResults(results) {
@@ -330,7 +330,7 @@ function displaySearchResults(results) {
             }
 
             var textSpan = document.createElement('span');
-            textSpan.innerHTML = item.title;
+            textSpan.innerHTML = item.highlightedTitle || item.title;
             a.appendChild(textSpan);
 
             searchResults.appendChild(a);
