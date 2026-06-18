@@ -1,4 +1,3 @@
-from .base_manager import BaseManager
 from .validators import (
     format_error_message,
     sanitize_filename,
@@ -11,7 +10,6 @@ from .validators import (
 )
 
 __all__ = [
-    "BaseManager",
     "validate_url",
     "validate_title",
     "validate_category_name",

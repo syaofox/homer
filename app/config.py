@@ -6,7 +6,6 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,6 @@ class AppConfig:
         self.base_dir: Path = Path()
         self.config_dir: Path = Path()
         self.data_dir: Path = Path()
-        self.config_file: Path = Path()
         self.db_file: Path = Path()
         self.images_dir: Path = Path()
 
@@ -62,14 +60,13 @@ class AppConfig:
             self.config_dir = self.base_dir / "config"
             self.data_dir = self.base_dir / "config"
 
-        self.config_file = self.config_dir / "config.json"
         self.db_file = self.config_dir / "homer.db"
         self.images_dir = self.data_dir / "img"
 
         self._ensure_directories()
 
         logger.info(f"Base directory: {self.base_dir}")
-        logger.info(f"Config file: {self.config_file}")
+        logger.info(f"Database: {self.db_file}")
         logger.info(f"Images directory: {self.images_dir}")
 
     def _find_project_root(self) -> Path:
@@ -119,11 +116,6 @@ class AppConfig:
             )
 
     @property
-    def config_path(self) -> str:
-        """获取配置文件路径"""
-        return str(self.config_file)
-
-    @property
     def db_path(self) -> str:
         """获取数据库文件路径"""
         return str(self.db_file)
@@ -169,39 +161,6 @@ class AppConfig:
     def get_static_url(self, filename: str) -> str:
         """获取静态文件URL"""
         return f"/config/img/{filename}"
-
-    def validate_config(self) -> bool:
-        """验证配置是否有效"""
-        try:
-            if not self.config_file.exists():
-                if self.is_docker:
-                    logger.error(f"Config file not found: {self.config_file}")
-                    return False
-                else:
-                    logger.info(f"Creating default config file: {self.config_file}")
-                    self._create_default_config()
-
-            if not self.images_dir.exists():
-                if self.is_docker:
-                    logger.error(f"Images directory not found: {self.images_dir}")
-                    return False
-
-            return True
-
-        except Exception as e:
-            logger.error(f"Config validation failed: {e}")
-            return False
-
-    def _create_default_config(self) -> None:
-        """创建默认配置文件"""
-        import json
-
-        default_config: dict[str, Any] = {"categories": []}
-
-        with open(self.config_file, "w", encoding="utf-8") as f:
-            json.dump(default_config, f, ensure_ascii=False, indent=2)
-
-        logger.info("Default config file created")
 
 
 config: AppConfig = AppConfig()

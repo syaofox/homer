@@ -2,7 +2,6 @@
 配置管理单元测试
 """
 
-
 from app.config import AppConfig
 
 
@@ -17,7 +16,6 @@ class TestAppConfig:
         config = AppConfig()
         assert config.db_path is not None
         assert config.images_path is not None
-        assert config.config_path is not None
 
     def test_default_properties(self) -> None:
         config = AppConfig()
@@ -37,9 +35,3 @@ class TestAppConfig:
         config = AppConfig()
         # 非 development 环境默认为 False
         assert isinstance(config.debug, bool)
-
-    def test_validate_config(self) -> None:
-        config = AppConfig()
-        # 不应抛异常
-        result = config.validate_config()
-        assert isinstance(result, bool)
