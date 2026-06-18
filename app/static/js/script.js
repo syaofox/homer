@@ -29,6 +29,14 @@ function iconToSvgHtml(iconClass) {
     return '<svg class="icon-svg" aria-hidden="true" viewBox="' + data[0] + '" xmlns="http://www.w3.org/2000/svg"><path d="' + data[1] + '"/></svg>';
 }
 
+// 将 'img/icon.png' 转换为 'img/thumbs/icon.png'（仅自定义图片）
+function thumbnailPath(iconPath) {
+    if (typeof iconPath === 'string' && iconPath.indexOf('img/') === 0) {
+        return 'img/thumbs/' + iconPath.substring(4);
+    }
+    return iconPath;
+}
+
 // 访问统计相关功能
 let visitStats = {};
 let badgesVisible = true; // 角标显示状态
@@ -164,7 +172,7 @@ function renderFrequentCategory() {
             item.appendChild(iconSpan);
         } else {
             var img = document.createElement('img');
-            img.src = '/config/' + site.icon;
+            img.src = '/config/' + thumbnailPath(site.icon);
             img.alt = site.title;
             img.className = 'icon-img';
             item.appendChild(img);
@@ -259,7 +267,7 @@ function displaySearchResults(results) {
                 a.appendChild(iconSpan);
             } else {
                 var img = document.createElement('img');
-                img.src = '/config/' + item.icon;
+                img.src = '/config/' + thumbnailPath(item.icon);
                 img.alt = item.title;
                 img.className = 'icon-img';
                 a.appendChild(img);
@@ -448,14 +456,14 @@ function openEditModal(initial, targetItem, gridForAdd) {
                         var img = document.createElement('img');
                         img.className = 'icon-img';
                         img.alt = newTitle;
-                        img.src = '/config/' + iconSelectValue;
+                        img.src = '/config/' + thumbnailPath(iconSelectValue);
                         newItem.appendChild(img);
                         newItem.setAttribute('data-icon', iconSelectValue);
                     } else if (iconFile && data.icon_path) {
                         var img = document.createElement('img');
                         img.className = 'icon-img';
                         img.alt = newTitle;
-                        img.src = '/config/' + data.icon_path;
+                        img.src = '/config/' + thumbnailPath(data.icon_path);
                         newItem.appendChild(img);
                         newItem.setAttribute('data-icon', data.icon_path);
                     } else {
@@ -504,7 +512,7 @@ function openEditModal(initial, targetItem, gridForAdd) {
                     if (iconFile && data.icon_path) {
                         var iconImg = targetItem.querySelector('img.icon-img');
                         var existingIcon = targetItem.querySelector('.nav-item-icon');
-                        var newIconSrc = '/config/' + data.icon_path;
+                        var newIconSrc = '/config/' + thumbnailPath(data.icon_path);
                         if (iconImg) {
                             iconImg.src = newIconSrc;
                         } else if (existingIcon) {
@@ -519,12 +527,12 @@ function openEditModal(initial, targetItem, gridForAdd) {
                         var existingImg2 = targetItem.querySelector('img.icon-img');
                         var existingIcon2 = targetItem.querySelector('.nav-item-icon');
                         if (existingImg2) {
-                            existingImg2.src = '/config/' + iconSelectValue;
+                            existingImg2.src = '/config/' + thumbnailPath(iconSelectValue);
                         } else if (existingIcon2) {
                             var newImg2 = document.createElement('img');
                             newImg2.className = 'icon-img';
                             newImg2.alt = newTitle;
-                            newImg2.src = '/config/' + iconSelectValue;
+                            newImg2.src = '/config/' + thumbnailPath(iconSelectValue);
                             existingIcon2.replaceWith(newImg2);
                         }
                         targetItem.setAttribute('data-icon', iconSelectValue);

@@ -16,7 +16,7 @@ from app.core.validators import (
     validate_icon_path,
 )
 from app.services import db_service
-from app.utils import get_version
+from app.utils import generate_thumbnail, get_version
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +178,7 @@ def handle_add_item() -> Any:
         if os.path.exists(save_path):
             return jsonify({"error": "文件已存在"}), 400
         icon.save(save_path)
+        generate_thumbnail(save_path, os.path.join(CONFIG_IMG_PATH, "thumbs"))
         icon_path = f"img/{filename}"
     else:
         icon_path = "fas fa-link"
@@ -219,6 +220,7 @@ def handle_edit_item() -> Any:
             if os.path.exists(save_path):
                 return jsonify({"error": "文件已存在"}), 400
             new_icon.save(save_path)
+            generate_thumbnail(save_path, os.path.join(CONFIG_IMG_PATH, "thumbs"))
             icon_path = f"img/{filename}"
 
     original_item = db_service.find_item_by_url(old_url) if old_url else None

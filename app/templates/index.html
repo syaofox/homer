@@ -47,7 +47,7 @@
                     {% if is_fa_icon(item.icon) %}
                         <span class="nav-item-icon">{{ icon_to_svg(item.icon)|safe }}</span>
                     {% else %}
-                        <img src="/config/{{ item.icon }}" alt="{{ item.title }}" class="icon-img">
+                        <img src="/config/{{ thumbnail_path(item.icon) }}" alt="{{ item.title }}" class="icon-img">
                     {% endif %}
                     <span>{{ item.title }}</span>
                     {% if item.visit_count > 0 %}
@@ -78,10 +78,9 @@
                     {% if is_fa_icon(item.icon) %}
                         <span class="nav-item-icon">{{ icon_to_svg(item.icon)|safe }}</span>
                     {% else %}
-                        <img src="/config/{{ item.icon }}" alt="{{ item.title }}" class="icon-img">
+                        <img src="/config/{{ thumbnail_path(item.icon) }}" alt="{{ item.title }}" class="icon-img">
                     {% endif %}
                     <span>{{ item.title }}</span>
-                    <!-- 拖动排序：移除箭头控制按钮 -->
                     <div class="nav-item-controls" style="display:none;"></div>
                 </a>
                 {% endfor %}

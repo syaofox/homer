@@ -3,13 +3,17 @@
 """
 
 import re
+from pathlib import Path
 
 from app.utils import (
     _ICON_SVG_MAP,
+    THUMBNAIL_SIZE,
     clean_html_content,
+    generate_thumbnail,
     get_version,
     icon_to_svg,
     is_fa_icon,
+    thumbnail_path,
     truncate_text,
 )
 
@@ -192,3 +196,41 @@ class TestIconSvgConsistency:
         assert common, "Python 与 JS 的 SVG 图标映射没有共同的键"
         assert not only_js, f"JS 中多出的图标键: {only_js}"
         assert not only_py, f"Python 中多出的图标键: {only_py}"
+
+
+class TestGenerateThumbnail:
+    def test_thumbnail_created(self, tmp_path: Path) -> None:
+        from PIL import Image
+        src = str(tmp_path / "test.png")
+        img = Image.new("RGB", (200, 300), color="red")
+        img.save(src)
+        thumb_dir = str(tmp_path / "thumbs")
+        result = generate_thumbnail(src, thumb_dir)
+        assert result is not None
+        thumb = Image.open(result)
+        assert thumb.width <= THUMBNAIL_SIZE
+        assert thumb.height <= THUMBNAIL_SIZE
+
+    def test_thumbnail_invalid_image(self, tmp_path: Path) -> None:
+        src = str(tmp_path / "not_an_image.txt")
+        with open(src, "w") as f:
+            f.write("not an image")
+        result = generate_thumbnail(src, str(tmp_path / "thumbs"))
+        assert result is None
+
+
+class TestThumbnailPath:
+    def test_custom_image(self) -> None:
+        assert thumbnail_path("img/icon.png") == "img/thumbs/icon.png"
+
+    def test_custom_image_subdir(self) -> None:
+        assert thumbnail_path("img/sub/dir/file.jpg") == "img/thumbs/sub/dir/file.jpg"
+
+    def test_fa_icon_unchanged(self) -> None:
+        assert thumbnail_path("fas fa-eye") == "fas fa-eye"
+
+    def test_empty_string(self) -> None:
+        assert thumbnail_path("") == ""
+
+    def test_non_string(self) -> None:
+        assert thumbnail_path("fa-link") == "fa-link"

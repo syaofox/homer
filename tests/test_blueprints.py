@@ -29,7 +29,7 @@ class TestIndexRoute:
         svc.add_item("测试", "自定义图", "https://example.com", "img/custom.png")
         resp = client.get("/")
         html = resp.data.decode()
-        assert 'src="/config/img/custom.png"' in html
+        assert 'src="/config/img/thumbs/custom.png"' in html
         assert 'class="icon-img"' in html
 
     def test_index_icons_in_frequent_section(

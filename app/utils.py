@@ -3,6 +3,7 @@
 包括版本解析、图标渲染、文本处理等
 """
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -109,3 +110,29 @@ def truncate_text(text: str, max_length: int = 100) -> str:
         return text
 
     return text[:max_length - 3] + "..."
+
+
+THUMBNAIL_SIZE = 128
+THUMBS_DIR_NAME = "thumbs"
+
+
+def generate_thumbnail(image_path: str, thumb_dir: str) -> str | None:
+    """生成缩略图，返回缩略图完整路径，失败返回 None"""
+    try:
+        from PIL import Image
+        img = Image.open(image_path)
+        img.thumbnail((THUMBNAIL_SIZE, THUMBNAIL_SIZE))
+        Path(thumb_dir).mkdir(parents=True, exist_ok=True)
+        thumb_path = os.path.join(thumb_dir, os.path.basename(image_path))
+        img.save(thumb_path)
+        return thumb_path
+    except Exception as e:
+        logger.warning(f"生成缩略图失败: {e}")
+        return None
+
+
+def thumbnail_path(icon_path: str) -> str:
+    """将 'img/icon.png' 转换为 'img/thumbs/icon.png'（仅自定义图片）"""
+    if icon_path.startswith("img/"):
+        return f"img/{THUMBS_DIR_NAME}/{icon_path[4:]}"
+    return icon_path
