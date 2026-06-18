@@ -47,6 +47,19 @@ class TestIndexRoute:
         assert resp.status_code == 200
         assert (img_dir / "thumbs" / "test.png").exists()
 
+    def test_thumbnail_fallback_to_original_for_svg(
+        self, client: FlaskClient, db: Any, tmp_path: Any, monkeypatch: Any
+    ) -> None:
+        from app.config import config as app_config
+        img_dir = tmp_path / "img"
+        img_dir.mkdir(parents=True)
+        monkeypatch.setattr(app_config, "images_dir", img_dir)
+        svg_path = img_dir / "icon.svg"
+        svg_path.write_text("<svg xmlns='http://www.w3.org/2000/svg'></svg>")
+        resp = client.get("/config/img/thumbs/icon.svg")
+        assert resp.status_code == 200
+        assert not (img_dir / "thumbs" / "icon.svg").exists()
+
     def test_index_icons_in_frequent_section(
         self, client: FlaskClient, sample_data: Any
     ) -> None:

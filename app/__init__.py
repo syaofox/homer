@@ -35,4 +35,6 @@ def serve_config_images(filename: str) -> Any:
         original = os.path.join(images_path, filename[len(THUMBS_DIR_NAME) + 1:])
         if os.path.exists(original):
             generate_thumbnail(original, os.path.join(images_path, THUMBS_DIR_NAME))
+        if not os.path.exists(full_path):
+            filename = filename[len(THUMBS_DIR_NAME) + 1:]
     return send_from_directory(images_path, filename)

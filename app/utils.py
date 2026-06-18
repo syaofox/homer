@@ -114,10 +114,14 @@ def truncate_text(text: str, max_length: int = 100) -> str:
 
 THUMBNAIL_SIZE = 128
 THUMBS_DIR_NAME = "thumbs"
+_SKIP_THUMBNAIL_EXTS = frozenset({".svg"})
 
 
 def generate_thumbnail(image_path: str, thumb_dir: str) -> str | None:
-    """生成缩略图，返回缩略图完整路径，失败返回 None"""
+    """生成缩略图，返回缩略图完整路径，失败返回 None（SVG 等矢量格式跳过）"""
+    ext = os.path.splitext(image_path)[1].lower()
+    if ext in _SKIP_THUMBNAIL_EXTS:
+        return None
     try:
         from PIL import Image
         img = Image.open(image_path)
@@ -132,7 +136,10 @@ def generate_thumbnail(image_path: str, thumb_dir: str) -> str | None:
 
 
 def thumbnail_path(icon_path: str) -> str:
-    """将 'img/icon.png' 转换为 'img/thumbs/icon.png'（仅自定义图片）"""
+    """将 'img/icon.png' 转换为 'img/thumbs/icon.png'（SVG 保持原路径）"""
     if icon_path.startswith("img/"):
+        ext = os.path.splitext(icon_path)[1].lower()
+        if ext in _SKIP_THUMBNAIL_EXTS:
+            return icon_path
         return f"img/{THUMBS_DIR_NAME}/{icon_path[4:]}"
     return icon_path

@@ -218,6 +218,13 @@ class TestGenerateThumbnail:
         result = generate_thumbnail(src, str(tmp_path / "thumbs"))
         assert result is None
 
+    def test_thumbnail_svg_skipped(self, tmp_path: Path) -> None:
+        src = str(tmp_path / "icon.svg")
+        with open(src, "w") as f:
+            f.write("<svg xmlns='http://www.w3.org/2000/svg'></svg>")
+        result = generate_thumbnail(src, str(tmp_path / "thumbs"))
+        assert result is None
+
 
 class TestThumbnailPath:
     def test_custom_image(self) -> None:
@@ -234,3 +241,9 @@ class TestThumbnailPath:
 
     def test_non_string(self) -> None:
         assert thumbnail_path("fa-link") == "fa-link"
+
+    def test_svg_skipped(self) -> None:
+        assert thumbnail_path("img/icon.svg") == "img/icon.svg"
+
+    def test_svg_deep_path_skipped(self) -> None:
+        assert thumbnail_path("img/sub/dir/file.svg") == "img/sub/dir/file.svg"
