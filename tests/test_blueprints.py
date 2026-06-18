@@ -32,6 +32,21 @@ class TestIndexRoute:
         assert 'src="/config/img/thumbs/custom.png"' in html
         assert 'class="icon-img"' in html
 
+    def test_thumbnail_generated_on_the_fly(
+        self, client: FlaskClient, db: Any, tmp_path: Any, monkeypatch: Any
+    ) -> None:
+        from PIL import Image
+
+        from app.config import config as app_config
+        img_dir = tmp_path / "img"
+        img_dir.mkdir(parents=True)
+        monkeypatch.setattr(app_config, "images_dir", img_dir)
+        src = str(img_dir / "test.png")
+        Image.new("RGB", (200, 300), color="blue").save(src)
+        resp = client.get("/config/img/thumbs/test.png")
+        assert resp.status_code == 200
+        assert (img_dir / "thumbs" / "test.png").exists()
+
     def test_index_icons_in_frequent_section(
         self, client: FlaskClient, sample_data: Any
     ) -> None:

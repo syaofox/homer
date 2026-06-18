@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 from flask import Flask, send_from_directory
@@ -5,7 +6,13 @@ from flask import Flask, send_from_directory
 from app.blueprints import main_bp
 from app.config import config as app_config
 from app.database import init_db
-from app.utils import icon_to_svg, is_fa_icon, thumbnail_path
+from app.utils import (
+    THUMBS_DIR_NAME,
+    generate_thumbnail,
+    icon_to_svg,
+    is_fa_icon,
+    thumbnail_path,
+)
 
 app: Flask = Flask(__name__)
 app.jinja_env.globals["icon_to_svg"] = icon_to_svg
@@ -22,4 +29,10 @@ app.register_blueprint(main_bp)
 
 @app.route("/config/img/<path:filename>")
 def serve_config_images(filename: str) -> Any:
-    return send_from_directory(app_config.images_path, filename)
+    images_path = app_config.images_path
+    full_path = os.path.join(images_path, filename)
+    if filename.startswith(f"{THUMBS_DIR_NAME}/") and not os.path.exists(full_path):
+        original = os.path.join(images_path, filename[len(THUMBS_DIR_NAME) + 1:])
+        if os.path.exists(original):
+            generate_thumbnail(original, os.path.join(images_path, THUMBS_DIR_NAME))
+    return send_from_directory(images_path, filename)
