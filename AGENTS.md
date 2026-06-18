@@ -24,9 +24,6 @@ uv run ruff check --fix .
 # Run the application
 uv run python main.py
 
-# Run data migration (JSON to SQLite)
-uv run python migrate.py
-
 # Update dependencies after changing pyproject.toml
 uv lock && uv sync
 
@@ -44,9 +41,8 @@ uv add --dev <package>
   - `config.py` - App configuration
   - `utils.py` - SVG icons, version, text utilities
 - `main.py` - Entry point
-- `migrate.py` - JSON → SQLite migration script
 - `tests/` - Pytest test suite
-- `config/` - Runtime data (db, images, JSON config)
+- `config/` - Runtime data (SQLite db, images)
 
 ## Coding Conventions
 
