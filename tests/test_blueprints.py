@@ -11,6 +11,34 @@ from app.services.db_service import DbService
 
 
 class TestIndexRoute:
+    def test_index_contains_svg_icon(self, client: FlaskClient, sample_data: Any) -> None:
+        resp = client.get("/")
+        assert resp.status_code == 200
+        html = resp.data.decode()
+        assert 'class="nav-item-icon"' in html
+        assert 'class="icon-svg"' in html
+
+    def test_index_contains_img_icon_when_icon_path_is_img(
+        self, client: FlaskClient, db: Any
+    ) -> None:
+        with db.get_cursor() as cursor:
+            cursor.execute("DELETE FROM items")
+            cursor.execute("DELETE FROM categories")
+        svc = DbService()
+        svc.get_or_create_category("测试")
+        svc.add_item("测试", "自定义图", "https://example.com", "img/custom.png")
+        resp = client.get("/")
+        html = resp.data.decode()
+        assert 'src="/config/img/custom.png"' in html
+        assert 'class="icon-img"' in html
+
+    def test_index_icons_in_frequent_section(
+        self, client: FlaskClient, sample_data: Any
+    ) -> None:
+        resp = client.get("/")
+        html = resp.data.decode()
+        assert 'class="icon-svg"' in html
+        assert 'class="icon-img"' not in html
     def test_index_returns_200(self, client: FlaskClient) -> None:
         resp = client.get("/")
         assert resp.status_code == 200

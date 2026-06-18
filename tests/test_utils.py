@@ -72,6 +72,59 @@ class TestIconToSvg:
         svg = icon_to_svg("fa-eye")
         assert "viewBox" in svg
 
+    def test_svg_has_correct_css_class(self) -> None:
+        svg = icon_to_svg("fas fa-link")
+        assert 'class="icon-svg"' in svg
+
+    def test_svg_contains_viewbox_and_path(self) -> None:
+        svg = icon_to_svg("fas fa-plus")
+        assert 'viewBox="0 0 448 512"' in svg
+        assert "<path d=" in svg
+
+    def test_svg_no_invalid_html(self) -> None:
+        svg = icon_to_svg("fas fa-eye")
+        assert "<script" not in svg
+        assert "onload" not in svg
+
+
+class TestIconSizingCSS:
+    """验证 CSS 文件中图标尺寸配置一致"""
+
+    CSS_PATH = "app/static/css/style.css"
+
+    def test_nav_item_icon_container_size(self) -> None:
+        """SVG 图标容器宽度应为 64px"""
+        with open(self.CSS_PATH) as f:
+            css = f.read()
+        assert ".nav-item .nav-item-icon" in css
+        assert "width: 64px" in css
+        assert "height: 64px" in css
+        assert "box-sizing: border-box" in css
+
+    def test_nav_item_svg_icon_size(self) -> None:
+        """SVG 图标本身应为 40x40px"""
+        with open(self.CSS_PATH) as f:
+            css = f.read()
+        assert ".nav-item .nav-item-icon .icon-svg" in css
+        assert "width: 40px" in css
+        assert "height: 40px" in css
+
+    def test_icon_img_uses_border_box(self) -> None:
+        """自定义图片图标应使用 box-sizing: border-box"""
+        with open(self.CSS_PATH) as f:
+            css = f.read()
+        assert ".icon-img" in css
+        assert "box-sizing: border-box" in css
+
+    def test_no_border_on_icon_container(self) -> None:
+        """SVG 图标容器无边框"""
+        with open(self.CSS_PATH) as f:
+            css = f.read()
+        idx = css.index(".nav-item i,\n.nav-item .nav-item-icon")
+        block_end = css.index("}", idx)
+        block = css[idx:block_end]
+        assert "border:" not in block
+
 
 class TestCleanHtmlContent:
     def test_remove_tags(self) -> None:
