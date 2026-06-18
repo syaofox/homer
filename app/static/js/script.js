@@ -288,6 +288,17 @@ function loadSortable() {
     });
 }
 
+function highlightSearchResult(item, searchTerm) {
+    if (!searchTerm || !item || !item.title) return item;
+    var title = item.title;
+    var idx = title.toLowerCase().indexOf(searchTerm.toLowerCase());
+    if (idx === -1) return item;
+    var before = title.substring(0, idx);
+    var match = title.substring(idx, idx + searchTerm.length);
+    var after = title.substring(idx + searchTerm.length);
+    return Object.assign({}, item, { title: before + '<mark>' + match + '</mark>' + after });
+}
+
 function displaySearchResults(results) {
     var searchResults = document.getElementById('search-results');
     var originalContent = document.getElementById('original-content');
@@ -319,7 +330,7 @@ function displaySearchResults(results) {
             }
 
             var textSpan = document.createElement('span');
-            textSpan.textContent = item.title;
+            textSpan.innerHTML = item.title;
             a.appendChild(textSpan);
 
             searchResults.appendChild(a);
@@ -640,24 +651,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var searchInput = document.getElementById('search-input');
     if (searchInput) {
+        var searchDebounceTimer = null;
         searchInput.addEventListener('input', function() {
-            var searchTerm = this.value.toLowerCase();
+            var searchTerm = this.value;
 
-            if (searchTerm.length > 0) {
-                fetch('/search?term=' + encodeURIComponent(searchTerm), { method: 'GET' })
-                    .then(function(res) { return res.json(); })
-                    .then(function(response) {
-                        displaySearchResults(response);
-                    })
-                    .catch(function(err) { console.warn('搜索失败:', err); });
-            } else {
+            if (searchDebounceTimer) {
+                clearTimeout(searchDebounceTimer);
+            }
+
+            if (searchTerm.length === 0) {
                 var searchResults = document.getElementById('search-results');
                 var originalContent = document.getElementById('original-content');
                 var frequentCategory = document.getElementById('frequent-category');
                 if (searchResults) searchResults.style.display = 'none';
                 if (originalContent) originalContent.style.display = '';
                 if (frequentCategory) frequentCategory.style.display = '';
+                return;
             }
+
+            searchDebounceTimer = setTimeout(function() {
+                var term = searchTerm.toLowerCase();
+                fetch('/search?term=' + encodeURIComponent(term), { method: 'GET' })
+                    .then(function(res) { return res.json(); })
+                    .then(function(response) {
+                        var highlighted = response.map(function(item) {
+                            return highlightSearchResult(item, searchTerm);
+                        });
+                        displaySearchResults(highlighted);
+                    })
+                    .catch(function(err) { console.warn('搜索失败:', err); });
+            }, 300);
         });
     }
 

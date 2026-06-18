@@ -10,6 +10,7 @@ from app.utils import (
     THUMBNAIL_SIZE,
     clean_html_content,
     generate_thumbnail,
+    get_pinyin_data,
     get_version,
     icon_to_svg,
     is_fa_icon,
@@ -28,6 +29,34 @@ class TestGetVersion:
         version = get_version()
         # 应为 semver 格式或 "unknown"
         assert version == "unknown" or len(version.split(".")) == 3
+
+
+class TestGetPinyinData:
+    def test_ascii_text(self) -> None:
+        result = get_pinyin_data("GitHub")
+        assert result["full"] == "github"
+        assert result["initials"] == "github"
+
+    def test_chinese_full_pinyin(self) -> None:
+        result = get_pinyin_data("百度")
+        assert result["full"] == "baidu"
+        assert result["initials"] == "bd"
+
+    def test_chinese_initials(self) -> None:
+        result = get_pinyin_data("微信")
+        assert result["initials"] == "wx"
+        assert result["initials"] != result["full"]
+
+    def test_empty_string(self) -> None:
+        result = get_pinyin_data("")
+        assert result["full"] == ""
+        assert result["initials"] == ""
+
+    def test_mixed_chinese_ascii(self) -> None:
+        result = get_pinyin_data("百度Cloud")
+        assert "baidu" in result["full"]
+        assert "cloud" in result["full"]
+        assert result["initials"] == "bdcloud"
 
 
 class TestIsFaIcon:

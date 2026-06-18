@@ -540,6 +540,18 @@ form input, form select, form button {
     background-color: #45a049;
 }
 
+mark {
+    background-color: #ffd54f;
+    color: #333;
+    border-radius: 2px;
+    padding: 0 2px;
+}
+
+html.dark-mode mark {
+    background-color: #5c3d00;
+    color: #ffd54f;
+}
+
 /* 分类标题 */
 .category-header {
     display: flex;

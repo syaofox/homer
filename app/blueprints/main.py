@@ -1,11 +1,11 @@
 import logging
 import os
+import time
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
 from flask import Blueprint, jsonify, render_template, request
-from pypinyin import lazy_pinyin
 from werkzeug.utils import secure_filename
 
 from app.config import config as app_config
@@ -16,13 +16,33 @@ from app.core.validators import (
     validate_icon_path,
 )
 from app.services import db_service
-from app.utils import generate_thumbnail, get_version
+from app.utils import generate_thumbnail, get_pinyin_data, get_version
 
 logger = logging.getLogger(__name__)
 
 main_bp = Blueprint("main", __name__)
 
 CONFIG_IMG_PATH = app_config.images_path
+
+_search_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
+_SEARCH_CACHE_TTL = 60
+
+
+def _get_cached_search(term: str) -> list[dict[str, Any]] | None:
+    data = _search_cache.get(term)
+    if data and time.time() - data[0] < _SEARCH_CACHE_TTL:
+        return data[1]
+    if data:
+        del _search_cache[term]
+    return None
+
+
+def _set_cached_search(term: str, results: list[dict[str, Any]]) -> None:
+    _search_cache[term] = (time.time(), results)
+
+
+def clear_search_cache() -> None:
+    _search_cache.clear()
 
 
 def error_handler(f: Callable[..., Any]) -> Callable[..., Any]:
@@ -80,6 +100,7 @@ def config() -> Any:
 
 
 def handle_config_post() -> Any:
+    clear_search_cache()
     action = request.form.get("action")
 
     if action == "add":
@@ -344,6 +365,10 @@ def search() -> Any:
 
     search_term_lower = search_term.lower()
 
+    cached = _get_cached_search(search_term_lower)
+    if cached is not None:
+        return jsonify(cached)
+
     try:
         categories = db_service.get_categories()
         results: list[dict[str, Any]] = []
@@ -352,15 +377,22 @@ def search() -> Any:
             for item in category.get("items", []):
                 title = item.get("title", "")
                 url = item.get("url", "")
-                title_pinyin = "".join(lazy_pinyin(title)).lower()
 
-                if (
-                    search_term_lower in title.lower()
-                    or search_term_lower in url.lower()
-                    or search_term_lower in title_pinyin
-                ):
+                if search_term_lower in title.lower() or search_term_lower in url.lower():
                     results.append(item)
+                    continue
 
+                pinyin_data = get_pinyin_data(title)
+                if search_term_lower in pinyin_data["full"]:
+                    results.append(item)
+                    continue
+                if search_term_lower in pinyin_data["initials"]:
+                    results.append(item)
+                    continue
+
+        results.sort(key=lambda x: x.get("visit_count", 0) or 0, reverse=True)
+
+        _set_cached_search(search_term_lower, results)
         return jsonify(results)
 
     except Exception as e:

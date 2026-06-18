@@ -284,6 +284,66 @@ class TestSearchRoute:
         data = resp.get_json()
         assert data == []
 
+    def test_search_pinyin_full(self, client: FlaskClient) -> None:
+        svc = DbService()
+        svc.get_or_create_category("工具")
+        svc.add_item("工具", "百度", "https://baidu.com")
+
+        resp = client.get("/search?term=baidu")
+        assert resp.status_code == 200
+        data = resp.get_json()
+        titles = [item["title"] for item in data]
+        assert "百度" in titles
+
+    def test_search_pinyin_initials(self, client: FlaskClient) -> None:
+        svc = DbService()
+        svc.get_or_create_category("社交")
+        svc.add_item("社交", "微信", "https://weixin.qq.com")
+
+        resp = client.get("/search?term=wx")
+        assert resp.status_code == 200
+        data = resp.get_json()
+        titles = [item["title"] for item in data]
+        assert "微信" in titles
+
+    def test_search_pinyin_initials_partial(self, client: FlaskClient) -> None:
+        svc = DbService()
+        svc.get_or_create_category("云服务")
+        svc.add_item("云服务", "百度云", "https://pan.baidu.com")
+
+        resp = client.get("/search?term=bdy")
+        assert resp.status_code == 200
+        data = resp.get_json()
+        titles = [item["title"] for item in data]
+        assert "百度云" in titles
+
+    def test_search_sorted_by_visit_count(self, client: FlaskClient) -> None:
+        svc = DbService()
+        svc.get_or_create_category("常用")
+        svc.add_item("常用", "Site A", "https://a.com")
+        svc.add_item("常用", "Site B", "https://b.com")
+
+        svc.record_visit("https://b.com", "Site B", "fas fa-link")
+        svc.record_visit("https://b.com", "Site B", "fas fa-link")
+        svc.record_visit("https://a.com", "Site A", "fas fa-link")
+
+        resp = client.get("/search?term=site")
+        assert resp.status_code == 200
+        data = resp.get_json()
+        titles = [item["title"] for item in data]
+        assert titles == ["Site B", "Site A"]
+
+    def test_search_cache_hit(self, client: FlaskClient) -> None:
+        resp_first = client.get("/search?term=git")
+        assert resp_first.status_code == 200
+        data_first = resp_first.get_json()
+
+        resp_second = client.get("/search?term=git")
+        assert resp_second.status_code == 200
+        data_second = resp_second.get_json()
+
+        assert data_first == data_second
+
 
 class TestVisitStatsRoute:
     def test_get_stats_empty(self, client: FlaskClient) -> None:

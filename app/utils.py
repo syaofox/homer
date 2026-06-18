@@ -86,6 +86,17 @@ def icon_to_svg(icon_class: str, css_class: str = "icon-svg") -> str:
     )
 
 
+def get_pinyin_data(text: str) -> dict[str, str]:
+    """获取中文拼音数据（全拼和首字母），用于搜索匹配"""
+    if not text:
+        return {"full": "", "initials": ""}
+    from pypinyin import Style, lazy_pinyin
+    return {
+        "full": "".join(lazy_pinyin(text)).lower(),
+        "initials": "".join(lazy_pinyin(text, style=Style.FIRST_LETTER)).lower(),
+    }
+
+
 def clean_html_content(content: str) -> str:
     """
     清理HTML内容，移除潜在的危险标签
