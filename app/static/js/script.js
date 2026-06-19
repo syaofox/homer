@@ -157,6 +157,22 @@ function updateThemeButton() {
     }
 }
 
+// 更新指定 URL 对应 DOM 元素上的角标
+function updateBadgeForUrl(url, visitCount) {
+    document.querySelectorAll('.nav-item').forEach(function(el) {
+        if (el.getAttribute('href') !== url) return;
+        var badge = el.querySelector('.click-badge');
+        if (badge) {
+            badge.textContent = visitCount;
+        } else if (visitCount > 0) {
+            badge = document.createElement('div');
+            badge.className = 'click-badge';
+            badge.textContent = visitCount;
+            el.appendChild(badge);
+        }
+    });
+}
+
 // 记录访问 - 发送到服务器
 function recordVisit(title, icon, url) {
     if (!url) return;
@@ -170,6 +186,7 @@ function recordVisit(title, icon, url) {
         .then(function(response) {
             if (response.success && response.data) {
                 visitStats[url] = response.data;
+                updateBadgeForUrl(url, response.data.visit_count);
             }
         })
         .catch(function(err) {
@@ -332,6 +349,13 @@ function displaySearchResults(results) {
             var textSpan = document.createElement('span');
             textSpan.innerHTML = item.highlightedTitle || item.title;
             a.appendChild(textSpan);
+
+            if (item.visit_count > 0) {
+                var badge = document.createElement('div');
+                badge.className = 'click-badge';
+                badge.textContent = item.visit_count;
+                a.appendChild(badge);
+            }
 
             searchResults.appendChild(a);
         });

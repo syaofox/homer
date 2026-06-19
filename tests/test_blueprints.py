@@ -67,6 +67,16 @@ class TestIndexRoute:
         html = resp.data.decode()
         assert 'class="icon-svg"' in html
         assert 'class="icon-img"' not in html
+
+    def test_index_contains_click_badge_in_regular_categories(
+        self, client: FlaskClient, sample_data: Any
+    ) -> None:
+        resp = client.get("/")
+        html = resp.data.decode()
+        assert 'class="click-badge"' in html
+        assert ">5<" in html
+        assert ">3<" in html
+
     def test_index_returns_200(self, client: FlaskClient) -> None:
         resp = client.get("/")
         assert resp.status_code == 200

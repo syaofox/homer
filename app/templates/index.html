@@ -96,6 +96,9 @@
                         <img src="/config/{{ thumbnail_path(item.icon) }}" alt="{{ item.title }}" class="icon-img">
                     {% endif %}
                     <span>{{ item.title }}</span>
+                    {% if item.visit_count > 0 %}
+                    <div class="click-badge">{{ item.visit_count }}</div>
+                    {% endif %}
                     <div class="nav-item-controls" style="display:none;"></div>
                 </a>
                 {% endfor %}
