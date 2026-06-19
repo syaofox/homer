@@ -304,7 +304,7 @@ def handle_delete_item() -> Any:
 
 
 def handle_reorder_items() -> Any:
-    category_name = request.form.get("category", "")
+    category_name = request.form.get("category", "").strip()
     if not category_name:
         return jsonify({"error": "分类名称是必需的"}), 400
 
@@ -320,7 +320,9 @@ def handle_reorder_items() -> Any:
     if not order_list:
         return jsonify({"error": "排序列表不能为空"}), 400
 
-    db_service.reorder_items(category_name, order_list)
+    if not db_service.reorder_items(category_name, order_list):
+        return jsonify({"error": "分类不存在或排序失败"}), 400
+
     return jsonify({"success": True, "message": "项目顺序已更新"})
 
 

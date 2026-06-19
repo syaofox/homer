@@ -940,8 +940,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
-            // 项目拖拽排序
-            document.querySelectorAll('.nav-grid').forEach(function(grid) {
+            // 项目拖拽排序（仅对分类下的 nav-grid 启用，排除搜索和常用区域）
+            document.querySelectorAll('.category-container .nav-grid').forEach(function(grid) {
                 new Sortable(grid, {
                     animation: 150,
                     delay: 150,
@@ -955,8 +955,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         return !evt.related.classList.contains('add-item');
                     },
                     onEnd: function(evt) {
-                        var h2 = grid.previousElementSibling;
-                        var category = h2 ? h2.textContent : '';
+                        var container = grid.closest('.category-container');
+                        var category = container ? container.dataset.category : '';
                         var items = grid.querySelectorAll('.nav-item:not(.add-item)');
                         var order = [];
                         for (var k = 0; k < items.length; k++) {

@@ -248,6 +248,47 @@ class TestConfigRoute:
         })
         assert resp.status_code == 200
 
+    def test_reorder_items_persists_order(self, client: FlaskClient, db: Any) -> None:
+        client.post("/config", data={"action": "add_category", "category": "分类"})
+        client.post("/config", data={
+            "action": "add", "category": "分类", "title": "A", "url": "https://a.com",
+        })
+        client.post("/config", data={
+            "action": "add", "category": "分类", "title": "B", "url": "https://b.com",
+        })
+        resp = client.post("/config", data={
+            "action": "reorder", "category": "分类", "order": "B,A",
+        })
+        assert resp.status_code == 200
+
+        with db.get_cursor() as cursor:
+            cursor.execute(
+                "SELECT title, display_order FROM items"
+                " WHERE category_id = (SELECT id FROM categories WHERE name = ?)"
+                " ORDER BY display_order",
+                ("分类",),
+            )
+            rows = cursor.fetchall()
+            assert len(rows) == 2
+            assert rows[0]["title"] == "B"
+            assert rows[1]["title"] == "A"
+
+    def test_reorder_items_whitespace_category(self, client: FlaskClient) -> None:
+        client.post("/config", data={"action": "add_category", "category": "分类"})
+        client.post("/config", data={
+            "action": "add", "category": "分类", "title": "A", "url": "https://a.com",
+        })
+        resp = client.post("/config", data={
+            "action": "reorder", "category": "  分类  ", "order": "A",
+        })
+        assert resp.status_code == 200
+
+    def test_reorder_items_nonexistent_category(self, client: FlaskClient) -> None:
+        resp = client.post("/config", data={
+            "action": "reorder", "category": "不存在的分类", "order": "A",
+        })
+        assert resp.status_code == 400
+
 
 class TestSearchRoute:
     @pytest.fixture(autouse=True)
