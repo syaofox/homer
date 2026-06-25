@@ -192,12 +192,15 @@ def handle_add_item() -> Any:
             return jsonify({"error": "无效的图标路径"}), 400
         icon_path: str = icon_path_param
     elif icon and icon.filename:
-        filename = sanitize_filename(secure_filename(icon.filename))
+        _, ext = os.path.splitext(icon.filename)
+        base = sanitize_filename(title) if title else ""
+        if base:
+            filename = base + ext if ext else base
+        else:
+            filename = sanitize_filename(secure_filename(icon.filename))
         if not filename:
             return jsonify({"error": "无效的文件名"}), 400
         save_path = os.path.join(CONFIG_IMG_PATH, filename)
-        if os.path.exists(save_path):
-            return jsonify({"error": "文件已存在"}), 400
         icon.save(save_path)
         generate_thumbnail(save_path, os.path.join(CONFIG_IMG_PATH, "thumbs"))
         icon_path = f"img/{filename}"
@@ -234,11 +237,14 @@ def handle_edit_item() -> Any:
             return jsonify({"error": "无效的图标路径"}), 400
         icon_path = new_icon_path_param
     elif new_icon and new_icon.filename:
-        filename = sanitize_filename(secure_filename(new_icon.filename))
+        _, ext = os.path.splitext(new_icon.filename)
+        base = sanitize_filename(new_title) if new_title else ""
+        if base:
+            filename = base + ext if ext else base
+        else:
+            filename = sanitize_filename(secure_filename(new_icon.filename))
         if filename:
             save_path = os.path.join(CONFIG_IMG_PATH, filename)
-            if os.path.exists(save_path):
-                return jsonify({"error": "文件已存在"}), 400
             new_icon.save(save_path)
             generate_thumbnail(save_path, os.path.join(CONFIG_IMG_PATH, "thumbs"))
             icon_path = f"img/{filename}"

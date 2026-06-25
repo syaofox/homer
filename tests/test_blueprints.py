@@ -303,6 +303,120 @@ class TestConfigRoute:
         data = resp.get_json()
         assert data["icon_path"] == "fas fa-server"
 
+    def test_add_item_upload_icon_renamed_to_title(
+        self, client: FlaskClient, monkeypatch: Any, tmp_path: Any
+    ) -> None:
+        import io
+
+        from PIL import Image
+
+        import app.blueprints.main as main_routes
+        img_dir = tmp_path / "img"
+        img_dir.mkdir(parents=True)
+        monkeypatch.setattr(main_routes, "CONFIG_IMG_PATH", str(img_dir))
+
+        buf = io.BytesIO()
+        Image.new("RGB", (1, 1), color="red").save(buf, "PNG")
+        buf.seek(0)
+
+        client.post("/config", data={"action": "add_category", "category": "测试"})
+        resp = client.post("/config", data={
+            "action": "add",
+            "category": "测试",
+            "title": "我的项目",
+            "url": "https://example.com",
+            "icon": (buf, "original_name.png"),
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["icon_path"] == "img/我的项目.png"
+        assert (img_dir / "我的项目.png").exists()
+
+    def test_add_item_upload_icon_overwrites_existing(
+        self, client: FlaskClient, monkeypatch: Any, tmp_path: Any
+    ) -> None:
+        import io
+
+        from PIL import Image
+
+        import app.blueprints.main as main_routes
+        img_dir = tmp_path / "img"
+        img_dir.mkdir(parents=True)
+        monkeypatch.setattr(main_routes, "CONFIG_IMG_PATH", str(img_dir))
+
+        buf = io.BytesIO()
+        Image.new("RGB", (1, 1), color="red").save(buf, "PNG")
+        buf.seek(0)
+
+        client.post("/config", data={"action": "add_category", "category": "测试"})
+        resp1 = client.post("/config", data={
+            "action": "add",
+            "category": "测试",
+            "title": "项目A",
+            "url": "https://a.com",
+            "icon": (buf, "any.png"),
+        })
+        assert resp1.status_code == 200
+
+        buf2 = io.BytesIO()
+        Image.new("RGB", (1, 1), color="blue").save(buf2, "PNG")
+        buf2.seek(0)
+
+        resp2 = client.post("/config", data={
+            "action": "add",
+            "category": "测试",
+            "title": "项目A",
+            "url": "https://a.com",
+            "icon": (buf2, "any.png"),
+        })
+        # Should overwrite without error, not 400
+        assert resp2.status_code == 200
+        data = resp2.get_json()
+        assert data["icon_path"] == "img/项目A.png"
+
+    def test_edit_item_upload_icon_renamed_to_new_title(
+        self, client: FlaskClient, monkeypatch: Any, tmp_path: Any
+    ) -> None:
+        import io
+
+        from PIL import Image
+
+        import app.blueprints.main as main_routes
+        img_dir = tmp_path / "img"
+        img_dir.mkdir(parents=True)
+        monkeypatch.setattr(main_routes, "CONFIG_IMG_PATH", str(img_dir))
+
+        buf = io.BytesIO()
+        Image.new("RGB", (1, 1), color="red").save(buf, "PNG")
+        buf.seek(0)
+
+        client.post("/config", data={"action": "add_category", "category": "分类"})
+        client.post("/config", data={
+            "action": "add",
+            "category": "分类",
+            "title": "旧标题",
+            "url": "https://old.com",
+        })
+
+        buf2 = io.BytesIO()
+        Image.new("RGB", (1, 1), color="blue").save(buf2, "PNG")
+        buf2.seek(0)
+
+        resp = client.post("/config", data={
+            "action": "edit",
+            "old_category": "分类",
+            "new_category": "分类",
+            "old_title": "旧标题",
+            "new_title": "新标题",
+            "new_url": "https://new.com",
+            "old_url": "https://old.com",
+            "new_icon": (buf2, "upload.png"),
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["icon_path"] == "img/新标题.png"
+        assert (img_dir / "新标题.png").exists()
+
     def test_delete_item(self, client: FlaskClient) -> None:
         client.post("/config", data={"action": "add_category", "category": "分类"})
         client.post("/config", data={
