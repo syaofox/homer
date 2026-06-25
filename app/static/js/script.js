@@ -589,33 +589,45 @@ function openEditModal(initial, targetItem, gridForAdd) {
                     var textSpanEl = targetItem.querySelector('span:not(.nav-item-icon)');
                     if (textSpanEl) textSpanEl.textContent = newTitle;
 
-                    if (iconFile && data.icon_path) {
-                        var iconImg = targetItem.querySelector('img.icon-img');
+                    var finalIconValue = iconFile && data.icon_path ? data.icon_path : iconSelectValue;
+                    if (finalIconValue) {
+                        var isFa = isFaIcon(finalIconValue);
+                        var iconSrc = '/config/' + thumbnailPath(finalIconValue);
+                        var existingImg = targetItem.querySelector('img.icon-img');
                         var existingIcon = targetItem.querySelector('.nav-item-icon');
-                        var newIconSrc = '/config/' + thumbnailPath(data.icon_path);
-                        if (iconImg) {
-                            iconImg.src = newIconSrc;
-                        } else if (existingIcon) {
-                            var newImg = document.createElement('img');
-                            newImg.className = 'icon-img';
-                            newImg.alt = newTitle;
-                            newImg.src = newIconSrc;
-                            existingIcon.replaceWith(newImg);
+                        if (isFa) {
+                            var svgHtml = iconToSvgHtml(finalIconValue);
+                            if (existingImg) {
+                                var newSpan = document.createElement('span');
+                                newSpan.className = 'nav-item-icon';
+                                newSpan.innerHTML = svgHtml;
+                                existingImg.replaceWith(newSpan);
+                            } else if (existingIcon) {
+                                existingIcon.innerHTML = svgHtml;
+                            } else {
+                                var span = document.createElement('span');
+                                span.className = 'nav-item-icon';
+                                span.innerHTML = svgHtml;
+                                targetItem.insertBefore(span, targetItem.querySelector('span:not(.nav-item-icon)'));
+                            }
+                        } else {
+                            if (existingImg) {
+                                existingImg.src = iconSrc;
+                            } else if (existingIcon) {
+                                var newImg = document.createElement('img');
+                                newImg.className = 'icon-img';
+                                newImg.alt = newTitle;
+                                newImg.src = iconSrc;
+                                existingIcon.replaceWith(newImg);
+                            } else {
+                                var img = document.createElement('img');
+                                img.className = 'icon-img';
+                                img.alt = newTitle;
+                                img.src = iconSrc;
+                                targetItem.insertBefore(img, targetItem.querySelector('span:not(.nav-item-icon)'));
+                            }
                         }
-                        targetItem.setAttribute('data-icon', data.icon_path);
-                    } else if (iconSelectValue) {
-                        var existingImg2 = targetItem.querySelector('img.icon-img');
-                        var existingIcon2 = targetItem.querySelector('.nav-item-icon');
-                        if (existingImg2) {
-                            existingImg2.src = '/config/' + thumbnailPath(iconSelectValue);
-                        } else if (existingIcon2) {
-                            var newImg2 = document.createElement('img');
-                            newImg2.className = 'icon-img';
-                            newImg2.alt = newTitle;
-                            newImg2.src = '/config/' + thumbnailPath(iconSelectValue);
-                            existingIcon2.replaceWith(newImg2);
-                        }
-                        targetItem.setAttribute('data-icon', iconSelectValue);
+                        targetItem.setAttribute('data-icon', finalIconValue);
                     }
 
                     var oldCategory = form.old_category.value;

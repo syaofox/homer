@@ -129,6 +129,15 @@ class DbService:
             row = cursor.fetchone()
             return dict(row) if row else None
 
+    def find_item_by_category_and_title(
+        self, category_name: str, title: str
+    ) -> dict[str, Any] | None:
+        """根据分类名称和标题查找项目"""
+        category = self.get_category_by_name(category_name)
+        if not category:
+            return None
+        return self.find_item(category["id"], title)
+
     def find_item_by_url(self, url: str) -> dict[str, Any] | None:
         """根据 URL 查找项目"""
         with self.db.get_cursor() as cursor:

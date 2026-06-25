@@ -122,6 +122,21 @@ class TestItems:
         assert item is not None
         assert item["url"] == "https://github.com"
 
+    def test_find_item_by_category_and_title(self, service: DbService) -> None:
+        service.add_item("工作", "GitHub", "https://github.com")
+        item = service.find_item_by_category_and_title("工作", "GitHub")
+        assert item is not None
+        assert item["title"] == "GitHub"
+        assert item["icon"] == "fas fa-link"
+
+    def test_find_item_by_category_and_title_not_found(self, service: DbService) -> None:
+        assert service.find_item_by_category_and_title("工作", "不存在") is None
+
+    def test_find_item_by_category_and_title_category_not_found(
+        self, service: DbService
+    ) -> None:
+        assert service.find_item_by_category_and_title("不存在", "Test") is None
+
     def test_update_item(self, service: DbService) -> None:
         service.add_item("工作", "GitHub", "https://github.com")
         result = service.update_item(  # noqa: E501

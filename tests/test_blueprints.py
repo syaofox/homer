@@ -209,6 +209,100 @@ class TestConfigRoute:
         data = resp.get_json()
         assert data["success"] is True
 
+    def test_edit_item_preserves_icon_when_no_icon_change(
+        self, client: FlaskClient
+    ) -> None:
+        client.post("/config", data={"action": "add_category", "category": "分类"})
+        client.post("/config", data={
+            "action": "add",
+            "category": "分类",
+            "title": "项目",
+            "url": "https://example.com",
+            "icon_path": "fas fa-robot",
+        })
+        resp = client.post("/config", data={
+            "action": "edit",
+            "old_category": "分类",
+            "new_category": "分类",
+            "old_title": "项目",
+            "new_title": "新标题",
+            "new_url": "https://new.com",
+            "old_url": "https://example.com",
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["icon_path"] == "fas fa-robot"
+
+    def test_edit_item_change_icon_to_fa(self, client: FlaskClient) -> None:
+        client.post("/config", data={"action": "add_category", "category": "分类"})
+        client.post("/config", data={
+            "action": "add",
+            "category": "分类",
+            "title": "项目",
+            "url": "https://example.com",
+        })
+        resp = client.post("/config", data={
+            "action": "edit",
+            "old_category": "分类",
+            "new_category": "分类",
+            "old_title": "项目",
+            "new_title": "项目",
+            "new_url": "https://example.com",
+            "old_url": "https://example.com",
+            "new_icon_path": "fas fa-server",
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["icon_path"] == "fas fa-server"
+
+    def test_edit_item_change_icon_to_image(self, client: FlaskClient) -> None:
+        client.post("/config", data={"action": "add_category", "category": "分类"})
+        client.post("/config", data={
+            "action": "add",
+            "category": "分类",
+            "title": "项目",
+            "url": "https://example.com",
+        })
+        resp = client.post("/config", data={
+            "action": "edit",
+            "old_category": "分类",
+            "new_category": "分类",
+            "old_title": "项目",
+            "new_title": "项目",
+            "new_url": "https://example.com",
+            "old_url": "https://example.com",
+            "new_icon_path": "img/custom.png",
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["icon_path"] == "img/custom.png"
+
+    def test_edit_item_icon_change_with_category_move(
+        self, client: FlaskClient
+    ) -> None:
+        client.post("/config", data={"action": "add_category", "category": "来源"})
+        client.post("/config", data={"action": "add_category", "category": "目标"})
+        client.post("/config", data={
+            "action": "add",
+            "category": "来源",
+            "title": "项目",
+            "url": "https://example.com",
+            "icon_path": "fas fa-link",
+        })
+        resp = client.post("/config", data={
+            "action": "edit",
+            "old_category": "来源",
+            "new_category": "目标",
+            "old_title": "项目",
+            "new_title": "项目",
+            "new_url": "https://example.com",
+            "old_url": "https://example.com",
+            "new_icon_path": "fas fa-server",
+        })
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["icon_path"] == "fas fa-server"
+
     def test_delete_item(self, client: FlaskClient) -> None:
         client.post("/config", data={"action": "add_category", "category": "分类"})
         client.post("/config", data={

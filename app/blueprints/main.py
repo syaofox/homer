@@ -224,7 +224,6 @@ def handle_edit_item() -> Any:
     new_url = request.form.get("new_url", "").strip()
     new_icon = request.files.get("new_icon")
     new_icon_path_param = request.form.get("new_icon_path")
-    old_url = request.form.get("old_url", "").strip()
 
     if old_category == db_service.FREQUENT_CATEGORY_NAME:
         return jsonify({"error": "常用项目不支持编辑，仅支持删除"}), 400
@@ -244,7 +243,9 @@ def handle_edit_item() -> Any:
             generate_thumbnail(save_path, os.path.join(CONFIG_IMG_PATH, "thumbs"))
             icon_path = f"img/{filename}"
 
-    original_item = db_service.find_item_by_url(old_url) if old_url else None
+    original_item = db_service.find_item_by_category_and_title(
+        old_category, old_title
+    ) if old_category and old_title else None
     final_icon = icon_path
     if not final_icon:
         final_icon = str(original_item.get("icon")) if original_item else "fas fa-link"
