@@ -718,6 +718,45 @@ document.addEventListener('DOMContentLoaded', function() {
                     .catch(function(err) { console.warn('搜索失败:', err); });
             }, 300);
         });
+
+        // Tab key on search input: jump to first visible search result
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Tab' && !event.shiftKey) {
+                var searchResults = document.getElementById('search-results');
+                if (searchResults && searchResults.style.display !== 'none' && searchResults.children.length > 0) {
+                    event.preventDefault();
+                    var firstResult = searchResults.querySelector('.nav-item');
+                    if (firstResult) {
+                        // 延迟聚焦以避开文档级 keydown 抢焦点逻辑
+                        setTimeout(function() { firstResult.focus(); }, 0);
+                    }
+                }
+            }
+        });
+    }
+
+    // Keyboard navigation within search results
+    var searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.addEventListener('keydown', function(event) {
+            var items = this.querySelectorAll('.nav-item');
+            if (items.length === 0) return;
+            var currentIndex = Array.from(items).indexOf(document.activeElement);
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                var nextIndex = Math.min(currentIndex + 1, items.length - 1);
+                items[nextIndex].focus();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                var prevIndex = Math.max(currentIndex - 1, 0);
+                items[prevIndex].focus();
+            } else if (event.key === 'Tab' && event.shiftKey && currentIndex === 0) {
+                event.preventDefault();
+                var input = document.getElementById('search-input');
+                if (input) input.focus();
+            }
+        });
     }
 
     // 添加分类弹窗的关闭和提交逻辑

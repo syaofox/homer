@@ -238,12 +238,14 @@
                 return el && el.offsetParent !== null && getComputedStyle(el).display !== 'none';
             }
 
-            // 监听整个文档的键盘事件（在弹窗或输入框聚焦时不抢焦点）
+            // 监听整个文档的键盘事件（在弹窗或右键菜单显示时不抢焦点）
             document.addEventListener('keydown', function(event) {
                 if (event.ctrlKey || event.altKey || event.metaKey) return;
+                // Tab 是导航键，不应触发焦点抢夺
+                if (event.key === 'Tab') return;
                 const active = document.activeElement;
                 const tag = active && active.tagName ? active.tagName.toLowerCase() : '';
-                // 若有弹窗或右键菜单显示，或当前正在输入，则不改变焦点
+                // 若有弹窗或右键菜单显示，则不改变焦点
                 const modal = document.getElementById('edit-modal');
                 const menu = document.getElementById('context-menu');
                 if (isVisible(modal) || isVisible(menu)) return;

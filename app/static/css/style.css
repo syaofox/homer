@@ -114,6 +114,11 @@ h1 {
     transform: translateY(-4px);
 }
 
+.nav-item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--toggle-active-bg);
+}
+
 .nav-item i,
 .nav-item .nav-item-icon {
     font-size: 0;
