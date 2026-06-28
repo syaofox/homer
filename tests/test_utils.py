@@ -138,12 +138,12 @@ class TestIconSizingCSS:
         assert "box-sizing: border-box" in css
 
     def test_nav_item_svg_icon_size(self) -> None:
-        """SVG 图标本身应为 44x44px"""
+        """SVG 图标本身应为 48x48px"""
         with open(self.CSS_PATH) as f:
             css = f.read()
         assert ".nav-item .nav-item-icon .icon-svg" in css
-        assert "width: 44px" in css
-        assert "height: 44px" in css
+        assert "width: 48px" in css
+        assert "height: 48px" in css
 
     def test_icon_img_uses_border_box(self) -> None:
         """自定义图片图标应使用 box-sizing: border-box"""

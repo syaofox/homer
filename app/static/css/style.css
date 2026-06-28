@@ -15,12 +15,12 @@
     --on-primary: #ffffff;
     --on-dark: #ffffff;
 
-    --bg: var(--canvas);
+    --bg: var(--canvas-parchment);
     --text: var(--ink);
     --text-secondary: var(--ink-muted-48);
     --heading: var(--ink);
     --border: var(--hairline);
-    --card-bg: #ebebeb;
+    --card-bg: var(--canvas);
     --card-shadow: none;
     --modal-bg: var(--canvas);
     --modal-overlay: rgba(0, 0, 0, 0.32);
@@ -50,12 +50,12 @@
 }
 
 html.dark-mode {
-    --bg: #000000;
+    --bg: #1d1d1f;
     --text: #f5f5f7;
     --text-secondary: #86868b;
     --heading: #f5f5f7;
     --border: #424245;
-    --card-bg: rgba(255,255,255,0.1);
+    --card-bg: rgba(255,255,255,0.12);
     --card-shadow: none;
     --modal-bg: #1d1d1f;
     --modal-overlay: rgba(0,0,0,0.7);
@@ -155,8 +155,8 @@ h1 {
 }
 
 .nav-item .nav-item-icon .icon-svg {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     fill: currentColor;
 }
 
@@ -238,8 +238,8 @@ h2 {
 }
 
 .icon-img {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     object-fit: contain;
     margin-bottom: 4px;
     background: var(--input-bg);
